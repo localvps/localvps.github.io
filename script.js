@@ -18,7 +18,19 @@
   }
 
   /* ---------- Scroll reveal ---------- */
-  var revealEls = document.querySelectorAll("[data-reveal]");
+  var revealEls = Array.prototype.slice.call(document.querySelectorAll("[data-reveal]"));
+
+  function inView(el) {
+    var r = el.getBoundingClientRect();
+    return r.top < window.innerHeight - 40 && r.bottom > 0;
+  }
+
+  function markVisible() {
+    revealEls.forEach(function (el) {
+      if (inView(el)) el.classList.add("in");
+    });
+  }
+
   if ("IntersectionObserver" in window && !reduced) {
     var io = new IntersectionObserver(
       function (entries) {
@@ -35,6 +47,9 @@
   } else {
     revealEls.forEach(function (el) { el.classList.add("in"); });
   }
+
+  window.addEventListener("load", markVisible);
+  setTimeout(markVisible, 900);
 
   /* ---------- Progress bar + nav ---------- */
   var progressBar = document.querySelector(".progress span");
@@ -53,23 +68,22 @@
   var dot = document.querySelector(".cursor-dot");
   var ring = document.querySelector(".cursor-ring");
   if (dot && ring && finePointer && !reduced) {
+    document.body.classList.add("custom-cursor");
     var mx = -100, my = -100, rx = -100, ry = -100;
-    var raf = null;
     document.addEventListener("mousemove", function (e) {
       mx = e.clientX;
       my = e.clientY;
       dot.style.left = mx + "px";
       dot.style.top = my + "px";
-      if (!raf) loop();
     });
-    function loop() {
+    (function loop() {
       rx += (mx - rx) * 0.18;
       ry += (my - ry) * 0.18;
       ring.style.left = rx + "px";
       ring.style.top = ry + "px";
-      raf = requestAnimationFrame(loop);
-    }
-    var hoverTargets = "a, button, .skill-card, .project, .magnetic";
+      requestAnimationFrame(loop);
+    })();
+    var hoverTargets = "a, button, .skill-card, .magnetic";
     document.addEventListener("mouseover", function (e) {
       if (e.target.closest(hoverTargets)) ring.classList.add("is-hover");
     });
@@ -120,7 +134,18 @@
     });
   }
 
-  /* ---------- WebGL scene ---------- */
+  /* ---------- Spotlight on work card ---------- */
+  if (finePointer) {
+    document.querySelectorAll(".work-cta").forEach(function (el) {
+      el.addEventListener("mousemove", function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty("--mx", ((e.clientX - r.left) / r.width) * 100 + "%");
+        el.style.setProperty("--my", ((e.clientY - r.top) / r.height) * 100 + "%");
+      });
+    });
+  }
+
+  /* ---------- WebGL background ---------- */
   var canvas = document.getElementById("bg");
   if (canvas && window.THREE && !reduced) {
     try {
@@ -134,60 +159,61 @@
 
       var scene = new THREE.Scene();
       var camera = new THREE.PerspectiveCamera(
-        60,
+        55,
         window.innerWidth / window.innerHeight,
         0.1,
         100
       );
-      camera.position.set(0, 0, 8);
+      camera.position.set(0, 0, 9);
 
-      var group = new THREE.Group();
-      scene.add(group);
+      function makeGlow(rgb, opacity) {
+        var size = 256;
+        var c = document.createElement("canvas");
+        c.width = c.height = size;
+        var ctx = c.getContext("2d");
+        var g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+        g.addColorStop(0, "rgba(" + rgb + ",1)");
+        g.addColorStop(0.35, "rgba(" + rgb + ",0.5)");
+        g.addColorStop(1, "rgba(" + rgb + ",0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, size, size);
+        var sprite = new THREE.Sprite(
+          new THREE.SpriteMaterial({
+            map: new THREE.CanvasTexture(c),
+            transparent: true,
+            opacity: opacity,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+          })
+        );
+        return sprite;
+      }
 
-      /* large wireframe icosahedron */
-      var ico = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(2.4, 1),
-        new THREE.MeshBasicMaterial({
-          color: 0xc8f542,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.14,
-        })
-      );
-      ico.position.set(-2.6, 1.1, -3);
-      group.add(ico);
+      var orbs = [
+        { sprite: makeGlow("200,245,66", 0.32), scale: 16, speed: 0.5, range: 2.4 },
+        { sprite: makeGlow("255,107,53", 0.22), scale: 12, speed: 0.42, range: 2.8 },
+        { sprite: makeGlow("148,163,184", 0.2), scale: 14, speed: 0.36, range: 3.2 },
+        { sprite: makeGlow("94,234,212", 0.16), scale: 9, speed: 0.6, range: 2 },
+      ];
 
-      /* torus knot */
-      var knot = new THREE.Mesh(
-        new THREE.TorusKnotGeometry(0.9, 0.28, 120, 18),
-        new THREE.MeshBasicMaterial({
-          color: 0xff6b35,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.1,
-        })
-      );
-      knot.position.set(3.1, -1.4, -4);
-      group.add(knot);
+      var positions = [
+        { x: -6.5, y: 2.2, z: -6 },
+        { x: 6.5, y: -3.4, z: -8 },
+        { x: 2.5, y: 4.4, z: -9 },
+        { x: -4.5, y: -4.2, z: -7 },
+      ];
 
-      /* small octahedron */
-      var oct = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.55, 0),
-        new THREE.MeshBasicMaterial({
-          color: 0xf4f4f2,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.2,
-        })
-      );
-      oct.position.set(3.6, 1.7, -2);
-      group.add(oct);
+      orbs.forEach(function (o, i) {
+        o.sprite.scale.set(o.scale, o.scale, 1);
+        o.sprite.position.set(positions[i].x, positions[i].y, positions[i].z);
+        scene.add(o.sprite);
+      });
 
-      /* particle field */
-      var count = 1400;
+      /* fine particle field */
+      var count = 600;
       var pos = new Float32Array(count * 3);
       for (var i = 0; i < count * 3; i++) {
-        pos[i] = (Math.random() - 0.5) * 34;
+        pos[i] = (Math.random() - 0.5) * 40;
       }
       var geo = new THREE.BufferGeometry();
       geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
@@ -195,9 +221,10 @@
         geo,
         new THREE.PointsMaterial({
           color: 0xf4f4f2,
-          size: 0.018,
+          size: 0.022,
           transparent: true,
-          opacity: 0.55,
+          opacity: 0.45,
+          depthWrite: false,
         })
       );
       scene.add(pts);
@@ -214,21 +241,18 @@
         requestAnimationFrame(animate);
         var t = clock.getElapsedTime();
 
-        ico.rotation.x = t * 0.12;
-        ico.rotation.y = t * 0.16;
-        ico.position.y = 1.1 + Math.sin(t * 0.6) * 0.3;
+        orbs.forEach(function (o, i) {
+          var p = o.sprite.position;
+          p.x = positions[i].x + Math.sin(t * o.speed + i * 2.1) * o.range * 0.4;
+          p.y = positions[i].y + Math.cos(t * o.speed * 0.9 + i * 1.4) * o.range * 0.4;
+          var s = o.scale * (1 + Math.sin(t * o.speed * 0.6 + i) * 0.06);
+          o.sprite.scale.set(s, s, 1);
+        });
 
-        knot.rotation.x = t * 0.22;
-        knot.rotation.y = t * 0.14;
+        pts.rotation.y = t * 0.015;
 
-        oct.rotation.x = t * 0.4;
-        oct.rotation.y = t * 0.3;
-        oct.position.y = 1.7 + Math.cos(t * 0.8) * 0.35;
-
-        pts.rotation.y = t * 0.02;
-
-        tX += (mouse.x * 1.3 - tX) * 0.04;
-        tY += (mouse.y * 0.9 - tY) * 0.04;
+        tX += (mouse.x * 1.1 - tX) * 0.035;
+        tY += (mouse.y * 0.7 - tY) * 0.035;
         camera.position.x = tX;
         camera.position.y = tY;
         camera.lookAt(0, 0, 0);

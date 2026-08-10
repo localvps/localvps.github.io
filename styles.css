@@ -67,6 +67,11 @@ body {
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
+}
+
+body.custom-cursor,
+body.custom-cursor a,
+body.custom-cursor button {
   cursor: none;
 }
 
@@ -615,139 +620,85 @@ body::after {
   transform: rotate(45deg);
 }
 
-/* projects */
-.projects {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 26px;
-}
-
-.project {
-  display: block;
+/* work */
+.work-cta {
+  display: flex;
+  align-items: center;
+  gap: 28px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  overflow: hidden;
+  padding: 34px 36px;
   background: var(--card);
+  position: relative;
+  overflow: hidden;
   transition: border-color 0.3s;
   will-change: transform;
   transform-style: preserve-3d;
 }
 
-.project:hover {
+.work-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(500px 160px at var(--mx, 50%) var(--my, 50%), rgba(200, 245, 66, 0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.work-cta:hover::after {
+  opacity: 1;
+}
+
+.work-cta:hover {
   border-color: rgba(200, 245, 66, 0.5);
 }
 
-.project-art {
-  position: relative;
-  height: 200px;
-  overflow: hidden;
+.work-cta-arrow {
+  font-size: 2rem;
+  color: var(--accent);
+  flex-shrink: 0;
+  transition: transform 0.3s var(--ease);
 }
 
-.art-1 {
-  background:
-    radial-gradient(120% 140% at 20% 20%, rgba(200, 245, 66, 0.5), transparent 55%),
-    radial-gradient(120% 140% at 80% 80%, rgba(255, 107, 53, 0.45), transparent 55%),
-    #1a1a1c;
+.work-cta:hover .work-cta-arrow {
+  transform: translate(4px, -4px);
 }
 
-.art-2 {
-  background:
-    radial-gradient(120% 140% at 80% 15%, rgba(34, 211, 238, 0.45), transparent 55%),
-    radial-gradient(120% 140% at 20% 85%, rgba(139, 92, 246, 0.5), transparent 55%),
-    #1a1a1c;
-}
-
-.art-3 {
-  background:
-    radial-gradient(120% 140% at 30% 30%, rgba(255, 107, 53, 0.5), transparent 55%),
-    radial-gradient(120% 140% at 75% 75%, rgba(200, 245, 66, 0.4), transparent 55%),
-    #1a1a1c;
-}
-
-.project-art::before,
-.project-art::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.project-art::before {
-  width: 120px;
-  height: 120px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: orbit 12s linear infinite;
-}
-
-.project-art::after {
-  width: 60px;
-  height: 60px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(45deg);
-  border-radius: 0;
-  border-color: rgba(255, 255, 255, 0.2);
-  animation: orbit 8s linear infinite reverse;
-}
-
-@keyframes orbit {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-.project-year {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(6px);
-  padding: 6px 12px;
-  border-radius: 999px;
-}
-
-.project-info {
-  padding: 24px;
-}
-
-.project-info h3 {
+.work-cta-info h3 {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-bottom: 6px;
 }
 
-.project-info h3::after {
-  content: "↗";
-  color: var(--accent);
-  opacity: 0;
-  transform: translate(-8px, 8px);
-  transition: opacity 0.3s, transform 0.3s var(--ease);
-}
-
-.project:hover .project-info h3::after {
-  opacity: 1;
-  transform: none;
-}
-
-.project-info p {
+.work-cta-info p {
   color: var(--muted);
-  font-size: 0.95rem;
-  margin-bottom: 16px;
+  font-size: 0.98rem;
 }
 
-.project-tags {
-  font-size: 0.82rem;
+.work-cta-url {
+  margin-left: auto;
+  font-size: 0.85rem;
   font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+.work-cta:hover .work-cta-url {
   color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .work-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 26px;
+  }
+  .work-cta-url {
+    margin-left: 0;
+  }
 }
 
 /* contact */
