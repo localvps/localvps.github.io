@@ -51,6 +51,60 @@
   window.addEventListener("load", markVisible);
   setTimeout(markVisible, 900);
 
+  /* ---------- Release load animations so parallax can take over ---------- */
+  function releaseAnim() {
+    var els = document.querySelectorAll(".anim-up");
+    Array.prototype.forEach.call(els, function (el) {
+      el.classList.remove("anim-up");
+      el.style.opacity = "1";
+    });
+  }
+  document.querySelectorAll(".anim-up").forEach(function (el) {
+    el.addEventListener("animationend", releaseAnim, { once: true });
+  });
+  setTimeout(releaseAnim, 2600);
+
+  /* ---------- Hero mouse parallax (3D depth layers) ---------- */
+  if (finePointer && !reduced) {
+    var depthEls = Array.prototype.slice.call(document.querySelectorAll("[data-depth]"));
+    document.addEventListener("mousemove", function (e) {
+      var nx = e.clientX / window.innerWidth - 0.5;
+      var ny = e.clientY / window.innerHeight - 0.5;
+      depthEls.forEach(function (el) {
+        var d = parseFloat(el.getAttribute("data-depth")) || 0;
+        el.style.transform =
+          "translate3d(" + (-nx * d).toFixed(1) + "px," + (-ny * d * 0.75).toFixed(1) + "px,0)";
+      });
+    });
+  }
+
+  /* ---------- Hero 3D exit on scroll ---------- */
+  var hero = document.querySelector(".hero");
+  var heroInner = document.querySelector(".hero-inner");
+  if (hero && heroInner) {
+    var exit = false;
+    window.addEventListener("scroll", function () {
+      if (exit) return;
+      var max = hero.offsetHeight;
+      var p = Math.min((window.pageYOffset || 0) / max, 1);
+      if (p <= 0.001) {
+        heroInner.style.opacity = "";
+        heroInner.style.transform = "";
+        return;
+      }
+      if (p >= 1) {
+        exit = true;
+        heroInner.style.opacity = "0";
+        heroInner.style.transform =
+          "perspective(900px) translateY(90px) rotateX(18deg)";
+        return;
+      }
+      heroInner.style.opacity = String(Math.max(1 - p * 1.2, 0));
+      heroInner.style.transform =
+        "perspective(900px) translateY(" + (p * 70).toFixed(1) + "px) rotateX(" + (p * 14).toFixed(1) + "deg)";
+    }, { passive: true });
+  }
+
   /* ---------- Progress bar + nav ---------- */
   var progressBar = document.querySelector(".progress span");
   var nav = document.querySelector(".nav");

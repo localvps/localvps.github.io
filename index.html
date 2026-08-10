@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <script>document.documentElement.classList.add('js');</script>
@@ -33,20 +33,26 @@
     </header>
 
     <section class="hero" id="top">
+      <div class="orbit" data-depth="44" aria-hidden="true">
+        <span class="orbit-ring ring1"><i></i></span>
+        <span class="orbit-ring ring2"><i></i></span>
+        <span class="orbit-ring ring3"><i></i></span>
+        <span class="orbit-core"></span>
+      </div>
       <div class="hero-inner">
-        <p class="hero-badge anim-up" style="animation-delay:.1s">
+        <p class="hero-badge anim-up" data-depth="26" style="animation-delay:.1s">
           <span class="pulse"></span> Available for new projects
         </p>
-        <h1 class="hero-title">
+        <h1 class="hero-title" data-depth="34">
           <span class="line"><span class="anim-up">Amir</span></span>
           <span class="line"><span class="anim-up">Hossein</span></span>
         </h1>
-        <p class="hero-role anim-up" style="animation-delay:.45s">Full-Stack Developer</p>
-        <p class="hero-tag anim-up" style="animation-delay:.55s">
+        <p class="hero-role anim-up" data-depth="22" style="animation-delay:.45s">Full-Stack Developer</p>
+        <p class="hero-tag anim-up" data-depth="14" style="animation-delay:.55s">
           I design and build fast, modern web products — from pixel-perfect UI to
           solid back-ends and everything in between.
         </p>
-        <div class="hero-actions anim-up" style="animation-delay:.7s">
+        <div class="hero-actions anim-up" data-depth="10" style="animation-delay:.7s">
           <a href="#contact" class="btn btn-primary magnetic">Let's talk</a>
           <a href="#work" class="btn btn-ghost magnetic">See my work</a>
         </div>
@@ -79,9 +85,9 @@
     <main>
       <section class="section" id="about">
         <div class="container">
-          <p class="sec-index" data-reveal>01 — About</p>
+          <p class="sec-index d3" data-reveal>01 — About</p>
           <div class="about-grid">
-            <h2 class="about-heading" data-reveal>
+            <h2 class="about-heading d3" data-reveal>
               Turning ideas into<br />products that <em>ship</em>.
             </h2>
             <div class="about-body" data-reveal>
@@ -116,16 +122,16 @@
 
       <section class="section" id="skills">
         <div class="container">
-          <p class="sec-index" data-reveal>02 — Skills</p>
-          <h2 class="section-title" data-reveal>My toolbox.</h2>
+          <p class="sec-index d3" data-reveal>02 — Skills</p>
+          <h2 class="section-title d3" data-reveal>My toolbox.</h2>
           <div class="skills-grid" id="skills-grid"></div>
         </div>
       </section>
 
       <section class="section" id="work">
         <div class="container">
-          <p class="sec-index" data-reveal>03 — Work</p>
-          <h2 class="section-title" data-reveal>What I'm up to.</h2>
+          <p class="sec-index d3" data-reveal>03 — Work</p>
+          <h2 class="section-title d3" data-reveal>What I'm up to.</h2>
           <a class="work-cta tilt" href="https://github.com/localvps" target="_blank" rel="noopener" data-reveal>
             <span class="work-cta-arrow" aria-hidden="true">↗</span>
             <div class="work-cta-info">
@@ -139,8 +145,8 @@
 
       <section class="section contact" id="contact">
         <div class="container">
-          <p class="sec-index" data-reveal>04 — Contact</p>
-          <h2 class="contact-title" data-reveal>
+          <p class="sec-index d3" data-reveal>04 — Contact</p>
+          <h2 class="contact-title d3" data-reveal>
             Have an idea?<br /><em>Let's build it.</em>
           </h2>
           <a class="btn btn-primary btn-lg magnetic" data-reveal href="mailto:amirhosseingivi85@gmail.com">
@@ -163,6 +169,6 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>
