@@ -3,85 +3,189 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AmirHossein | Full-Stack Developer</title>
-  <meta name="description" content="Portfolio and resume of AmirHossein — Full-Stack Developer." />
+  <title>AmirHossein — Full-Stack Developer</title>
+  <meta name="description" content="Portfolio and resume of AmirHossein — a full-stack developer building fast, modern products." />
+  <meta name="theme-color" content="#0a0a0b" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <p class="greeting">Hi, I'm</p>
-      <h1>AmirHossein</h1>
-      <p class="role">Full-Stack Developer</p>
-      <p class="tagline">I build fast, modern web applications and tools with clean, maintainable code.</p>
-      <div class="hero-actions">
-        <a href="#contact" class="btn btn-primary">Contact Me</a>
-        <a href="#projects" class="btn btn-ghost">View Projects</a>
+  <script>document.documentElement.classList.add('js');</script>
+
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <div class="progress" aria-hidden="true"><span></span></div>
+
+  <canvas id="bg"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="site">
+    <header class="nav">
+      <a class="nav-logo magnetic" href="#top" aria-label="Home">AM<span>·</span>H</a>
+      <nav class="nav-links">
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#work">Work</a>
+      </nav>
+      <a class="nav-cta magnetic" href="#contact">Contact</a>
+    </header>
+
+    <section class="hero" id="top">
+      <div class="hero-inner">
+        <p class="hero-badge anim-up" style="animation-delay:.1s">
+          <span class="pulse"></span> Available for new projects
+        </p>
+        <h1 class="hero-title">
+          <span class="line"><span class="anim-up">Amir</span></span>
+          <span class="line"><span class="anim-up">Hossein</span></span>
+        </h1>
+        <p class="hero-role anim-up" style="animation-delay:.45s">Full-Stack Developer</p>
+        <p class="hero-tag anim-up" style="animation-delay:.55s">
+          I design and build fast, modern web products — from pixel-perfect UI to
+          solid back-ends and everything in between.
+        </p>
+        <div class="hero-actions anim-up" style="animation-delay:.7s">
+          <a href="#contact" class="btn btn-primary magnetic">Let's talk</a>
+          <a href="#work" class="btn btn-ghost magnetic">See my work</a>
+        </div>
+      </div>
+      <a class="scroll-hint" href="#about" aria-label="Scroll down">
+        <span class="scroll-hint-line"></span>
+        <span class="scroll-hint-text">scroll</span>
+      </a>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        <span>TypeScript</span><i>◆</i>
+        <span>Node.js</span><i>◆</i>
+        <span>React</span><i>◆</i>
+        <span>PHP</span><i>◆</i>
+        <span>Java</span><i>◆</i>
+        <span>C#</span><i>◆</i>
+        <span>CSS / HTML</span><i>◆</i>
+        <span>TypeScript</span><i>◆</i>
+        <span>Node.js</span><i>◆</i>
+        <span>React</span><i>◆</i>
+        <span>PHP</span><i>◆</i>
+        <span>Java</span><i>◆</i>
+        <span>C#</span><i>◆</i>
+        <span>CSS / HTML</span><i>◆</i>
       </div>
     </div>
-  </header>
 
-  <main>
-    <section id="about" class="section">
-      <div class="container">
-        <h2 class="section-title">About Me</h2>
-        <p class="about-text">
-          I'm a passionate developer who enjoys solving problems and building products end-to-end.
-          I work across the stack — from user interfaces to back-end services and databases.
-        </p>
-      </div>
-    </section>
-
-    <section id="skills" class="section section-alt">
-      <div class="container">
-        <h2 class="section-title">Skills</h2>
-        <div class="skills-grid" id="skills-grid"></div>
-      </div>
-    </section>
-
-    <section id="projects" class="section">
-      <div class="container">
-        <h2 class="section-title">Projects</h2>
-        <div class="projects-grid">
-          <article class="project-card">
-            <h3>Project One</h3>
-            <p>Short description of your project and what it does. Add your own projects here.</p>
-            <span class="project-stack">TypeScript · React</span>
-          </article>
-          <article class="project-card">
-            <h3>Project Two</h3>
-            <p>Short description of your project and what it does. Add your own projects here.</p>
-            <span class="project-stack">Node.js · PHP</span>
-          </article>
-          <article class="project-card">
-            <h3>Project Three</h3>
-            <p>Short description of your project and what it does. Add your own projects here.</p>
-            <span class="project-stack">C# · Java</span>
-          </article>
+    <main>
+      <section class="section" id="about">
+        <div class="container">
+          <p class="sec-index" data-reveal>01 — About</p>
+          <div class="about-grid">
+            <h2 class="about-heading" data-reveal>
+              Turning ideas into<br />products that <em>ship</em>.
+            </h2>
+            <div class="about-body" data-reveal>
+              <p>
+                I'm a developer who cares about the details. I've spent years
+                building web applications across the full stack — clean
+                TypeScript on the front, solid Node.js services behind it, and
+                pragmatic PHP when the job calls for it.
+              </p>
+              <p>
+                I like to keep things simple: fewer moving parts, readable code,
+                and interfaces that feel natural to use.
+              </p>
+            </div>
+          </div>
+          <div class="about-stats" data-reveal>
+            <div class="stat">
+              <span class="stat-num">7+</span>
+              <span class="stat-label">Technologies</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">100%</span>
+              <span class="stat-label">Self-taught</span>
+            </div>
+            <div class="stat">
+              <span class="stat-num">∞</span>
+              <span class="stat-label">Cups of coffee</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="contact" class="section section-alt">
-      <div class="container">
-        <h2 class="section-title">Get In Touch</h2>
-        <p class="about-text">Have a project in mind or just want to say hi?</p>
-        <div class="contact-links">
-          <a class="contact-link" href="mailto:your@email.com">✉ your@email.com</a>
-          <a class="contact-link" href="https://github.com/localvps" target="_blank" rel="noopener">🐙 GitHub</a>
-          <a class="contact-link" href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener">💼 LinkedIn</a>
+      <section class="section" id="skills">
+        <div class="container">
+          <p class="sec-index" data-reveal>02 — Skills</p>
+          <h2 class="section-title" data-reveal>My toolbox.</h2>
+          <div class="skills-grid" id="skills-grid"></div>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <footer class="footer">
-    <p>© 2026 AmirHossein · Built with HTML & CSS</p>
-  </footer>
+      <section class="section" id="work">
+        <div class="container">
+          <p class="sec-index" data-reveal>03 — Work</p>
+          <h2 class="section-title" data-reveal>Selected projects.</h2>
+          <div class="projects">
+            <a class="project tilt" href="#" target="_blank" rel="noopener" data-reveal>
+              <div class="project-art art-1">
+                <span class="project-year">2026</span>
+              </div>
+              <div class="project-info">
+                <h3>Project One</h3>
+                <p>What it is, what problem it solves, and the stack behind it.</p>
+                <span class="project-tags">TypeScript · React</span>
+              </div>
+            </a>
+            <a class="project tilt" href="#" target="_blank" rel="noopener" data-reveal>
+              <div class="project-art art-2">
+                <span class="project-year">2025</span>
+              </div>
+              <div class="project-info">
+                <h3>Project Two</h3>
+                <p>What it is, what problem it solves, and the stack behind it.</p>
+                <span class="project-tags">Node.js · PHP</span>
+              </div>
+            </a>
+            <a class="project tilt" href="#" target="_blank" rel="noopener" data-reveal>
+              <div class="project-art art-3">
+                <span class="project-year">2025</span>
+              </div>
+              <div class="project-info">
+                <h3>Project Three</h3>
+                <p>What it is, what problem it solves, and the stack behind it.</p>
+                <span class="project-tags">C# · Java</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
 
+      <section class="section contact" id="contact">
+        <div class="container">
+          <p class="sec-index" data-reveal>04 — Contact</p>
+          <h2 class="contact-title" data-reveal>
+            Have an idea?<br /><em>Let's build it.</em>
+          </h2>
+          <a class="btn btn-primary btn-lg magnetic" data-reveal href="mailto:aloneserver.ir@gmail.com">
+            aloneserver.ir@gmail.com
+          </a>
+          <div class="contact-links" data-reveal>
+            <a class="contact-link magnetic" href="https://github.com/localvps" target="_blank" rel="noopener">GitHub</a>
+            <a class="contact-link magnetic" href="https://linkedin.com/in/amirhossein" target="_blank" rel="noopener">LinkedIn</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 AmirHossein</span>
+      <span class="footer-loc">Tehran, Iran — UTC+3:30</span>
+      <a href="#top" class="footer-top">Back to top ↑</a>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
