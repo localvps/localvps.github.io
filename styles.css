@@ -287,97 +287,6 @@ body::after {
   max-width: 1100px;
   margin: 0 auto;
   width: 100%;
-  position: relative;
-  z-index: 1;
-  transform-style: preserve-3d;
-}
-
-/* orbital 3D rings */
-.orbit {
-  position: absolute;
-  top: 50%;
-  right: clamp(-160px, -4vw, 30px);
-  transform: translateY(-50%);
-  width: 460px;
-  height: 460px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.orbit-ring {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  border-radius: 50%;
-}
-
-.orbit-ring i {
-  position: absolute;
-  top: -5px;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  margin-left: -4.5px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 14px rgba(200, 245, 66, 0.8);
-}
-
-.ring1 {
-  width: 460px;
-  height: 460px;
-  border: 1px dashed rgba(200, 245, 66, 0.22);
-  animation: spin1 26s linear infinite;
-}
-
-.ring2 {
-  width: 330px;
-  height: 330px;
-  border: 1px solid rgba(255, 107, 53, 0.28);
-  animation: spin2 18s linear infinite;
-}
-
-.ring2 i {
-  background: var(--accent-2);
-  box-shadow: 0 0 14px rgba(255, 107, 53, 0.8);
-}
-
-.ring3 {
-  width: 210px;
-  height: 210px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  animation: spin3 12s linear infinite;
-}
-
-.ring3 i {
-  background: #94a3b8;
-  box-shadow: 0 0 10px rgba(148, 163, 184, 0.8);
-}
-
-.orbit-core {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 26px rgba(200, 245, 66, 0.7);
-}
-
-@keyframes spin1 {
-  from { transform: perspective(900px) rotateX(72deg) rotateZ(0deg); }
-  to { transform: perspective(900px) rotateX(72deg) rotateZ(360deg); }
-}
-
-@keyframes spin2 {
-  from { transform: perspective(900px) rotateX(58deg) rotateZ(0deg); }
-  to { transform: perspective(900px) rotateX(58deg) rotateZ(-360deg); }
-}
-
-@keyframes spin3 {
-  from { transform: perspective(900px) rotateX(80deg) rotateZ(0deg); }
-  to { transform: perspective(900px) rotateX(80deg) rotateZ(360deg); }
 }
 
 .hero-badge {
@@ -878,10 +787,6 @@ body::after {
 
   .hero {
     padding-top: 140px;
-  }
-
-  .orbit {
-    display: none;
   }
 }
 
