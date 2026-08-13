@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AmirHossein — Full-Stack Developer</title>
-  <meta name="description" content="Portfolio and resume of AmirHossein — a full-stack developer building fast, modern products." />
-  <meta name="theme-color" content="#0a0a0b" />
+  <meta name="description" content="Portfolio and resume of AmirHossein — a full-stack developer building fast, modern web products." />
+  <meta name="theme-color" content="#08080c" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=6" />
 </head>
 <body>
   <script>document.documentElement.classList.add('js');</script>
@@ -18,18 +18,24 @@
   <div class="cursor-ring" aria-hidden="true"></div>
   <div class="progress" aria-hidden="true"><span></span></div>
 
-  <canvas id="bg"></canvas>
-  <div class="vignette" aria-hidden="true"></div>
+  <div class="bg-scene" aria-hidden="true">
+    <div class="bg-aurora b1"></div>
+    <div class="bg-aurora b2"></div>
+    <div class="bg-aurora b3"></div>
+    <div class="bg-grid"></div>
+    <div class="bg-noise"></div>
+    <div class="bg-vignette"></div>
+  </div>
 
   <div class="site">
-    <header class="nav">
+    <header class="nav" id="nav">
       <a class="nav-logo magnetic" href="#top" aria-label="Home">AM<span>·</span>H</a>
       <nav class="nav-links">
         <a href="#about">About</a>
         <a href="#skills">Skills</a>
         <a href="#work">Work</a>
       </nav>
-      <a class="nav-cta magnetic" href="#contact">Contact</a>
+      <a class="btn btn-ghost btn-sm nav-cta magnetic" href="#contact">Hire me</a>
     </header>
 
     <section class="hero" id="top">
@@ -38,16 +44,16 @@
           <span class="pulse"></span> Available for new projects
         </p>
         <h1 class="hero-title">
-          <span class="line"><span class="anim-up">Amir</span></span>
-          <span class="line"><span class="anim-up">Hossein</span></span>
+          <span class="line"><span class="glitch anim-up" data-text="Amir" style="animation-delay:.2s">Amir</span></span>
+          <span class="line"><span class="glitch grad-text anim-up" data-text="Hossein" style="animation-delay:.3s">Hossein</span></span>
         </h1>
-        <p class="hero-role anim-up" style="animation-delay:.45s">Full-Stack Developer</p>
+        <p class="hero-role anim-up" style="animation-delay:.45s"><span class="role-line"></span>Full-Stack Developer<span class="role-line"></span></p>
         <p class="hero-tag anim-up" style="animation-delay:.55s">
           I design and build fast, modern web products — from pixel-perfect UI to
           solid back-ends and everything in between.
         </p>
         <div class="hero-actions anim-up" style="animation-delay:.7s">
-          <a href="#contact" class="btn btn-primary magnetic">Let's talk</a>
+          <a href="#contact" class="btn btn-gradient magnetic" data-gradient-border>Let's talk</a>
           <a href="#work" class="btn btn-ghost magnetic">See my work</a>
         </div>
       </div>
@@ -66,6 +72,8 @@
         <span>Java</span><i>◆</i>
         <span>C#</span><i>◆</i>
         <span>CSS / HTML</span><i>◆</i>
+        <span>Git &amp; GitHub</span><i>◆</i>
+        <span>Linux / Bash</span><i>◆</i>
         <span>TypeScript</span><i>◆</i>
         <span>Node.js</span><i>◆</i>
         <span>React</span><i>◆</i>
@@ -73,16 +81,18 @@
         <span>Java</span><i>◆</i>
         <span>C#</span><i>◆</i>
         <span>CSS / HTML</span><i>◆</i>
+        <span>Git &amp; GitHub</span><i>◆</i>
+        <span>Linux / Bash</span><i>◆</i>
       </div>
     </div>
 
     <main>
       <section class="section" id="about">
         <div class="container">
-          <p class="sec-index d3" data-reveal>01 — About</p>
+          <p class="sec-index d3" data-reveal><span>01</span> — About</p>
           <div class="about-grid">
             <h2 class="about-heading d3" data-reveal>
-              Turning ideas into<br />products that <em>ship</em>.
+              Turning ideas into<br />products that <em class="grad-text">ship</em>.
             </h2>
             <div class="about-body" data-reveal>
               <p>
@@ -116,34 +126,74 @@
 
       <section class="section" id="skills">
         <div class="container">
-          <p class="sec-index d3" data-reveal>02 — Skills</p>
-          <h2 class="section-title d3" data-reveal>My toolbox.</h2>
+          <p class="sec-index d3" data-reveal><span>02</span> — Skills</p>
+          <h2 class="section-title d3" data-reveal>My <em class="grad-text">toolbox.</em></h2>
           <div class="skills-grid" id="skills-grid"></div>
         </div>
       </section>
 
       <section class="section" id="work">
         <div class="container">
-          <p class="sec-index d3" data-reveal>03 — Work</p>
-          <h2 class="section-title d3" data-reveal>What I'm up to.</h2>
-          <a class="work-cta tilt" href="https://github.com/localvps" target="_blank" rel="noopener" data-reveal>
-            <span class="work-cta-arrow" aria-hidden="true">↗</span>
-            <div class="work-cta-info">
-              <h3>All my projects &amp; open source</h3>
-              <p>Browse the code I write and ship on GitHub.</p>
-            </div>
-            <span class="work-cta-url">github.com/localvps</span>
+          <p class="sec-index d3" data-reveal><span>03</span> — Work</p>
+          <h2 class="section-title d3" data-reveal>What I'm <em class="grad-text">up to.</em></h2>
+          <div class="projects-grid">
+            <a class="project-card tilt" href="https://github.com/localvps/whispering-dungeon" target="_blank" rel="noopener" data-reveal>
+              <span class="project-top">
+                <span class="project-arrow" aria-hidden="true">↗</span>
+                <span class="project-tag">HTML · JS</span>
+              </span>
+              <span class="project-info">
+                <span class="project-title">The Whispering Dungeon</span>
+                <span class="project-desc">A free browser dungeon-crawl adventure — explorable, playable, no install.</span>
+              </span>
+              <span class="project-glow" aria-hidden="true"></span>
+              <span class="project-shine" aria-hidden="true"></span>
+            </a>
+            <a class="project-card tilt" href="https://github.com/localvps/guardvpn" target="_blank" rel="noopener" data-reveal>
+              <span class="project-top">
+                <span class="project-arrow" aria-hidden="true">↗</span>
+                <span class="project-tag">Shell · Bash</span>
+              </span>
+              <span class="project-info">
+                <span class="project-title">GuardVPN</span>
+                <span class="project-desc">A streamlined SSH tunnel manager for fast, reliable VPN connections.</span>
+              </span>
+              <span class="project-glow" aria-hidden="true"></span>
+              <span class="project-shine" aria-hidden="true"></span>
+            </a>
+            <a class="project-card tilt" href="https://github.com/localvps/smsbomber" target="_blank" rel="noopener" data-reveal>
+              <span class="project-top">
+                <span class="project-arrow" aria-hidden="true">↗</span>
+                <span class="project-tag">PHP</span>
+              </span>
+              <span class="project-info">
+                <span class="project-title">SMS Bomber</span>
+                <span class="project-desc">A PHP-based messaging tool with a terminal-friendly CLI workflow.</span>
+              </span>
+              <span class="project-glow" aria-hidden="true"></span>
+              <span class="project-shine" aria-hidden="true"></span>
+            </a>
+          </div>
+          <a class="work-card tilt" href="https://github.com/localvps" target="_blank" rel="noopener" data-reveal>
+            <span class="work-card-arrow" aria-hidden="true">↗</span>
+            <span class="work-card-info">
+              <span class="work-card-title">All my projects &amp; open source</span>
+              <span class="work-card-desc">Browse the code I write and ship on GitHub.</span>
+            </span>
+            <span class="work-card-url">github.com/localvps</span>
+            <span class="work-card-glow" aria-hidden="true"></span>
+            <span class="work-card-shine" aria-hidden="true"></span>
           </a>
         </div>
       </section>
 
       <section class="section contact" id="contact">
         <div class="container">
-          <p class="sec-index d3" data-reveal>04 — Contact</p>
+          <p class="sec-index d3" data-reveal><span>04</span> — Contact</p>
           <h2 class="contact-title d3" data-reveal>
-            Have an idea?<br /><em>Let's build it.</em>
+            Have an idea?<br /><em class="grad-text">Let's build it.</em>
           </h2>
-          <a class="btn btn-primary btn-lg magnetic" data-reveal href="mailto:amirhosseingivi85@gmail.com">
+          <a class="btn btn-neon magnetic" data-reveal href="mailto:amirhosseingivi85@gmail.com">
             amirhosseingivi85@gmail.com
           </a>
           <div class="contact-links" data-reveal>
@@ -162,7 +212,6 @@
     </footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>

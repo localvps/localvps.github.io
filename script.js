@@ -8,26 +8,27 @@
   var skills = ["TypeScript", "Node.js", "React", "PHP", "Java", "CSS / HTML", "C#"];
   var grid = document.getElementById("skills-grid");
   if (grid) {
-    skills.forEach(function (s) {
+    skills.forEach(function (s, i) {
       var card = document.createElement("div");
       card.className = "skill-card";
       card.setAttribute("data-tilt", "");
-      card.textContent = s;
+      card.style.animationDelay = (i * 0.06) + "s";
+      card.innerHTML =
+        '<span class="skill-idx">' + String(i + 1).padStart(2, "0") + "</span>" +
+        '<span class="skill-glow" aria-hidden="true"></span>' +
+        s;
       grid.appendChild(card);
     });
   }
 
   /* ---------- Scroll reveal ---------- */
   var revealEls = Array.prototype.slice.call(document.querySelectorAll("[data-reveal]"));
-
-  function inView(el) {
-    var r = el.getBoundingClientRect();
-    return r.top < window.innerHeight - 40 && r.bottom > 0;
-  }
+  var d3Els = Array.prototype.slice.call(document.querySelectorAll(".d3"));
 
   function markVisible() {
     revealEls.forEach(function (el) {
-      if (inView(el)) el.classList.add("in");
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight - 40 && r.bottom > 0) el.classList.add("in");
     });
   }
 
@@ -83,7 +84,7 @@
       ring.style.top = ry + "px";
       requestAnimationFrame(loop);
     })();
-    var hoverTargets = "a, button, .skill-card, .magnetic";
+    var hoverTargets = "a, button, [data-tilt], .tilt, .skill-card";
     document.addEventListener("mouseover", function (e) {
       if (e.target.closest(hoverTargets)) ring.classList.add("is-hover");
     });
@@ -100,174 +101,104 @@
     });
   }
 
-  /* ---------- Magnetic buttons ---------- */
+  /* ---------- Magnetic buttons (spring-smoothed) ---------- */
   if (finePointer && !reduced) {
     document.querySelectorAll(".magnetic").forEach(function (el) {
-      var strength = 0.3;
+      var strength = 0.32;
+      var tx = 0, ty = 0, x = 0, y = 0, on = false;
       el.addEventListener("mousemove", function (e) {
         var r = el.getBoundingClientRect();
-        var x = e.clientX - r.left - r.width / 2;
-        var y = e.clientY - r.top - r.height / 2;
-        el.style.transform = "translate(" + x * strength + "px," + y * strength + "px)";
+        tx = (e.clientX - r.left - r.width / 2) * strength;
+        ty = (e.clientY - r.top - r.height / 2) * strength;
+        if (!on) { on = true; requestAnimationFrame(loop); }
       });
       el.addEventListener("mouseleave", function () {
-        el.style.transform = "";
+        tx = 0; ty = 0;
       });
+      function loop() {
+        x += (tx - x) * 0.2;
+        y += (ty - y) * 0.2;
+        el.style.transform = "translate(" + x.toFixed(2) + "px," + y.toFixed(2) + "px)";
+        if (Math.abs(tx - x) > 0.05 || Math.abs(ty - y) > 0.05) {
+          requestAnimationFrame(loop);
+        } else {
+          on = false;
+        }
+      }
     });
   }
 
-  /* ---------- 3D tilt ---------- */
+  /* ---------- 3D tilt with lerp + shine tracking ---------- */
+  function bindTilt(el, opts) {
+    var max = (opts && opts.max) || 8;
+    var scale = (opts && opts.scale) || 1.03;
+    var t = { x: 0, y: 0, tx: 0, ty: 0, s: 1, ts: 1 };
+
+    el.addEventListener("mousemove", function (e) {
+      var r = el.getBoundingClientRect();
+      var nx = (e.clientX - r.left) / r.width - 0.5;
+      var ny = (e.clientY - r.top) / r.height - 0.5;
+      t.ty = nx * max;
+      t.tx = -ny * max * 0.7;
+      t.ts = scale;
+      el.style.setProperty("--gx", ((nx + 0.5) * 100).toFixed(2) + "%");
+      el.style.setProperty("--gy", ((ny + 0.5) * 100).toFixed(2) + "%");
+    });
+    el.addEventListener("mouseleave", function () {
+      t.tx = 0; t.ty = 0; t.ts = 1;
+    });
+
+    (function loop() {
+      t.x += (t.tx - t.x) * 0.12;
+      t.y += (t.ty - t.y) * 0.12;
+      t.s += (t.ts - t.s) * 0.12;
+      el.style.transform =
+        "perspective(900px) rotateX(" + t.x.toFixed(2) + "deg) rotateY(" +
+        t.y.toFixed(2) + "deg) scale(" + t.s.toFixed(3) + ")";
+      requestAnimationFrame(loop);
+    })();
+  }
+
   if (finePointer && !reduced) {
     document.querySelectorAll("[data-tilt], .tilt").forEach(function (el) {
-      var max = 8;
-      el.addEventListener("mousemove", function (e) {
-        var r = el.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width - 0.5;
-        var py = (e.clientY - r.top) / r.height - 0.5;
-        el.style.transform =
-          "perspective(900px) rotateX(" + (-py * max).toFixed(2) + "deg) rotateY(" +
-          (px * max).toFixed(2) + "deg)";
-      });
-      el.addEventListener("mouseleave", function () {
-        el.style.transform = "";
-      });
+      bindTilt(el, { max: 8, scale: 1.03 });
     });
   }
 
   /* ---------- Spotlight on work card ---------- */
   if (finePointer) {
-    document.querySelectorAll(".work-cta").forEach(function (el) {
+    document.querySelectorAll(".work-card").forEach(function (el) {
       el.addEventListener("mousemove", function (e) {
         var r = el.getBoundingClientRect();
         el.style.setProperty("--mx", ((e.clientX - r.left) / r.width) * 100 + "%");
         el.style.setProperty("--my", ((e.clientY - r.top) / r.height) * 100 + "%");
       });
     });
+    document.querySelectorAll(".contact-link").forEach(function (el) {
+      el.addEventListener("mousemove", function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty("--gx", ((e.clientX - r.left) / r.width) * 100 + "%");
+        el.style.setProperty("--gy", ((e.clientY - r.top) / r.height) * 100 + "%");
+      });
+    });
   }
 
-  /* ---------- WebGL background ---------- */
-  var canvas = document.getElementById("bg");
-  if (canvas && window.THREE && !reduced) {
-    try {
-      var renderer = new THREE.WebGLRenderer({
-        canvas: canvas,
-        alpha: true,
-        antialias: true,
-      });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(window.innerWidth, window.innerHeight);
-
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(
-        55,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        100
-      );
-      camera.position.set(0, 0, 9);
-
-      function makeGlow(rgb, opacity) {
-        var size = 256;
-        var c = document.createElement("canvas");
-        c.width = c.height = size;
-        var ctx = c.getContext("2d");
-        var g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-        g.addColorStop(0, "rgba(" + rgb + ",1)");
-        g.addColorStop(0.35, "rgba(" + rgb + ",0.5)");
-        g.addColorStop(1, "rgba(" + rgb + ",0)");
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, size, size);
-        var sprite = new THREE.Sprite(
-          new THREE.SpriteMaterial({
-            map: new THREE.CanvasTexture(c),
-            transparent: true,
-            opacity: opacity,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false,
-          })
-        );
-        return sprite;
-      }
-
-      var orbs = [
-        { sprite: makeGlow("200,245,66", 0.32), scale: 16, speed: 0.5, range: 2.4 },
-        { sprite: makeGlow("255,107,53", 0.22), scale: 12, speed: 0.42, range: 2.8 },
-        { sprite: makeGlow("148,163,184", 0.2), scale: 14, speed: 0.36, range: 3.2 },
-        { sprite: makeGlow("94,234,212", 0.16), scale: 9, speed: 0.6, range: 2 },
-      ];
-
-      var positions = [
-        { x: -6.5, y: 2.2, z: -6 },
-        { x: 6.5, y: -3.4, z: -8 },
-        { x: 2.5, y: 4.4, z: -9 },
-        { x: -4.5, y: -4.2, z: -7 },
-      ];
-
-      orbs.forEach(function (o, i) {
-        o.sprite.scale.set(o.scale, o.scale, 1);
-        o.sprite.position.set(positions[i].x, positions[i].y, positions[i].z);
-        scene.add(o.sprite);
-      });
-
-      /* fine particle field */
-      var count = 600;
-      var pos = new Float32Array(count * 3);
-      for (var i = 0; i < count * 3; i++) {
-        pos[i] = (Math.random() - 0.5) * 40;
-      }
-      var geo = new THREE.BufferGeometry();
-      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-      var pts = new THREE.Points(
-        geo,
-        new THREE.PointsMaterial({
-          color: 0xf4f4f2,
-          size: 0.022,
-          transparent: true,
-          opacity: 0.45,
-          depthWrite: false,
-        })
-      );
-      scene.add(pts);
-
-      var mouse = { x: 0, y: 0 };
-      var tX = 0, tY = 0;
-      window.addEventListener("mousemove", function (e) {
-        mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
-        mouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
-      });
-
-      var clock = new THREE.Clock();
-      function animate() {
-        requestAnimationFrame(animate);
-        var t = clock.getElapsedTime();
-
-        orbs.forEach(function (o, i) {
-          var p = o.sprite.position;
-          p.x = positions[i].x + Math.sin(t * o.speed + i * 2.1) * o.range * 0.4;
-          p.y = positions[i].y + Math.cos(t * o.speed * 0.9 + i * 1.4) * o.range * 0.4;
-          var s = o.scale * (1 + Math.sin(t * o.speed * 0.6 + i) * 0.06);
-          o.sprite.scale.set(s, s, 1);
+  /* ---------- Moving gradient border fallback for browsers without @property ---------- */
+  var gradientBtns = document.querySelectorAll("[data-gradient-border]");
+  var propertyAPI = window.CSS && (CSS.registerProperty || CSS.supports("(animation-timeline: none)"));
+  if (gradientBtns.length && !propertyAPI) {
+    var started = false;
+    gradientBtns.forEach(function (el) {
+      if (started) return;
+      started = true;
+      var deg = 0;
+      (function tick() {
+        deg = (deg + 2) % 360;
+        gradientBtns.forEach(function (b) {
+          b.style.setProperty("--angle", deg + "deg");
         });
-
-        pts.rotation.y = t * 0.015;
-
-        tX += (mouse.x * 1.1 - tX) * 0.035;
-        tY += (mouse.y * 0.7 - tY) * 0.035;
-        camera.position.x = tX;
-        camera.position.y = tY;
-        camera.lookAt(0, 0, 0);
-
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      window.addEventListener("resize", function () {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-    } catch (err) {
-      if (canvas) canvas.remove();
-    }
+        requestAnimationFrame(tick);
+      })();
+    });
   }
 })();
