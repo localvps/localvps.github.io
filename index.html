@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
   <script>document.documentElement.classList.add('js');</script>
@@ -17,6 +17,8 @@
   <div class="cursor-dot" aria-hidden="true"></div>
   <div class="cursor-ring" aria-hidden="true"></div>
   <div class="progress" aria-hidden="true"><span></span></div>
+
+  <canvas id="stardust" aria-hidden="true"></canvas>
 
   <div class="bg-scene" aria-hidden="true">
     <div class="bg-aurora b1"></div>
@@ -40,21 +42,43 @@
 
     <section class="hero" id="top">
       <div class="hero-inner">
-        <p class="hero-badge anim-up" style="animation-delay:.1s">
-          <span class="pulse"></span> Available for new projects
-        </p>
-        <h1 class="hero-title">
-          <span class="line"><span class="glitch anim-up" data-text="Amir" style="animation-delay:.2s">Amir</span></span>
-          <span class="line"><span class="glitch grad-text anim-up" data-text="Hossein" style="animation-delay:.3s">Hossein</span></span>
-        </h1>
-        <p class="hero-role anim-up" style="animation-delay:.45s"><span class="role-line"></span>Full-Stack Developer<span class="role-line"></span></p>
-        <p class="hero-tag anim-up" style="animation-delay:.55s">
-          I design and build fast, modern web products — from pixel-perfect UI to
-          solid back-ends and everything in between.
-        </p>
-        <div class="hero-actions anim-up" style="animation-delay:.7s">
-          <a href="#contact" class="btn btn-gradient magnetic" data-gradient-border>Let's talk</a>
-          <a href="#work" class="btn btn-ghost magnetic">See my work</a>
+        <div class="hero-copy">
+          <p class="hero-badge anim-up" style="animation-delay:.1s">
+            <span class="pulse"></span> Available for new projects
+          </p>
+          <h1 class="hero-title">
+            <span class="line"><span class="glitch anim-up" data-text="Amir" style="animation-delay:.2s">Amir</span></span>
+            <span class="line"><span class="glitch grad-text anim-up" data-text="Hossein" style="animation-delay:.3s">Hossein</span></span>
+          </h1>
+          <p class="hero-role anim-up" style="animation-delay:.45s"><span class="role-line"></span>Full-Stack Developer<span class="role-line"></span></p>
+          <p class="hero-tag anim-up" style="animation-delay:.55s">
+            I design and build fast, modern web products — from pixel-perfect UI to
+            solid back-ends and everything in between.
+          </p>
+          <div class="hero-actions anim-up" style="animation-delay:.7s">
+            <a href="#contact" class="btn btn-3d magnetic">Let's talk</a>
+            <a href="#work" class="btn btn-ghost magnetic">See my work</a>
+          </div>
+        </div>
+
+        <div class="hero-stage" id="hero-stage">
+          <div class="globe-wrap">
+            <div class="globe-halo" aria-hidden="true"></div>
+            <div class="globe-ring" aria-hidden="true"></div>
+            <canvas id="globe" aria-hidden="true"></canvas>
+            <div class="glass-card g1">
+              <span class="gc-num">7+</span>
+              <span class="gc-label">Technologies</span>
+            </div>
+            <div class="glass-card g2">
+              <span class="gc-num">100%</span>
+              <span class="gc-label">Self-taught</span>
+            </div>
+            <div class="glass-card g3">
+              <span class="gc-num">∞</span>
+              <span class="gc-label">Cups of coffee</span>
+            </div>
+          </div>
         </div>
       </div>
       <a class="scroll-hint" href="#about" aria-label="Scroll down">
@@ -94,7 +118,7 @@
             <h2 class="about-heading d3" data-reveal>
               Turning ideas into<br />products that <em class="grad-text">ship</em>.
             </h2>
-            <div class="about-body" data-reveal>
+            <div class="about-body d3" data-reveal>
               <p>
                 I'm a developer who cares about the details. I've spent years
                 building web applications across the full stack — clean
@@ -105,20 +129,6 @@
                 I like to keep things simple: fewer moving parts, readable code,
                 and interfaces that feel natural to use.
               </p>
-            </div>
-          </div>
-          <div class="about-stats" data-reveal>
-            <div class="stat">
-              <span class="stat-num">7+</span>
-              <span class="stat-label">Technologies</span>
-            </div>
-            <div class="stat">
-              <span class="stat-num">100%</span>
-              <span class="stat-label">Self-taught</span>
-            </div>
-            <div class="stat">
-              <span class="stat-num">∞</span>
-              <span class="stat-label">Cups of coffee</span>
             </div>
           </div>
         </div>
@@ -212,6 +222,7 @@
     </footer>
   </div>
 
-  <script src="script.js?v=6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+  <script src="script.js?v=7"></script>
 </body>
 </html>
