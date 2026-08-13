@@ -262,7 +262,9 @@
   initStardust();
 
   /* ============================================================
-     Energy Orb (Three.js) — elegant particle core + orbit rings
+     Hypercore — full-frame volumetric energy field (Three.js)
+     The particle ball overflows the square frame so no corner
+     stays empty; orbit rings sweep across the cloud.
      ============================================================ */
   function initOrb() {
     var canvas = document.getElementById("globe");
@@ -270,7 +272,6 @@
 
     var THREE = window.THREE;
     var wrap = canvas.parentElement;
-    var R = 1;
 
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -280,15 +281,14 @@
     camera.position.set(0, 0, 3.1);
 
     var root = new THREE.Group();
-    root.rotation.x = 0.45;
     scene.add(root);
 
     var orb = new THREE.Group();
     root.add(orb);
 
     var rotY = 0.6;
-    var tilt = 0.45;
-    var tiltTarget = 0.45;
+    var tilt = 0;
+    var tiltTarget = 0;
     var inertiaX = 0, inertiaY = 0;
     var dragging = false;
     var visible = true;
@@ -297,6 +297,9 @@
 
     function clamp(v, lo, hi) {
       return Math.max(lo, Math.min(hi, v));
+    }
+    function cbrt(x) {
+      return Math.pow(x, 1 / 3);
     }
 
     /* ---- soft round point texture ---- */
@@ -315,8 +318,8 @@
     }
     var dotTex = makeDotTexture();
 
-    /* ---- particle sphere (fibonacci distribution) ---- */
-    function fibSphere(n) {
+    /* ---- volumetric particle ball (fills entire frame) ---- */
+    function fib(n) {
       var pts = [];
       var golden = Math.PI * (3 - Math.sqrt(5));
       for (var i = 0; i < n; i++) {
@@ -328,34 +331,54 @@
       return pts;
     }
 
-    var N = 3200;
-    var base = fibSphere(N);
-    var posArr = new Float32Array(N * 3);
-    var colArr = new Float32Array(N * 3);
-    var white = [235, 240, 255], violet = [197, 181, 253], cyan = [110, 231, 248], deep = [160, 130, 245];
+    var Rb = 2.05;
+    var nMain = 5200;
+    var nShell = 1600;
+    var total = nMain + nShell;
+    var pos = new Float32Array(total * 3);
+    var col = new Float32Array(total * 3);
 
-    base.forEach(function (v, i) {
-      var jit = R + (Math.random() - 0.5) * 0.09;
-      posArr[i * 3] = v.x * jit;
-      posArr[i * 3 + 1] = v.y * jit;
-      posArr[i * 3 + 2] = v.z * jit;
-      var col;
-      if (i % 9 === 0) col = cyan;
-      else if (i % 4 === 0) col = white;
-      else if (i % 2 === 0) col = violet;
-      else col = deep;
-      var f = 0.75 + Math.random() * 0.35;
-      colArr[i * 3] = col[0] * f;
-      colArr[i * 3 + 1] = col[1] * f;
-      colArr[i * 3 + 2] = col[2] * f;
+    var white = [235, 240, 255], violet = [197, 181, 253], cyan = [110, 231, 248], deep = [160, 130, 245];
+    var idx = 0;
+
+    function put(x, y, z, c, f) {
+      pos[idx * 3] = x;
+      pos[idx * 3 + 1] = y;
+      pos[idx * 3 + 2] = z;
+      col[idx * 3] = c[0] * f;
+      col[idx * 3 + 1] = c[1] * f;
+      col[idx * 3 + 2] = c[2] * f;
+      idx++;
+    }
+
+    /* even volumetric fill — uniform density inside the ball */
+    var dirs = fib(nMain);
+    dirs.forEach(function (v) {
+      var r = Rb * cbrt(Math.random());
+      var f = 0.35 + 0.65 * (r / Rb) * (0.7 + 0.3 * Math.random());
+      var c;
+      if (idx % 9 === 0) c = cyan;
+      else if (idx % 4 === 0) c = white;
+      else if (idx % 2 === 0) c = violet;
+      else c = deep;
+      put(v.x * r, v.y * r, v.z * r, c, f);
+    });
+
+    /* bright outer shell for the glowing edge */
+    var rimDirs = fib(nShell);
+    rimDirs.forEach(function (v) {
+      var r = Rb * (0.94 + 0.06 * Math.random());
+      var c = Math.random() < 0.5 ? violet : white;
+      var f = 1.0 + Math.random() * 0.45;
+      put(v.x * r, v.y * r, v.z * r, c, f);
     });
 
     var pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute("position", new THREE.BufferAttribute(posArr, 3));
-    pGeo.setAttribute("color", new THREE.BufferAttribute(colArr, 3));
+    pGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    pGeo.setAttribute("color", new THREE.BufferAttribute(col, 3));
 
     var pMat = new THREE.PointsMaterial({
-      size: 0.05,
+      size: 0.042,
       map: dotTex,
       transparent: true,
       opacity: 0.95,
@@ -367,13 +390,78 @@
     var points = new THREE.Points(pGeo, pMat);
     orb.add(points);
 
-    /* ---- faint inner sphere for depth ---- */
+    /* ---- full-bleed starfield layer (guarantees the square is
+           covered edge-to-edge, corners included) ---- */
+    var fieldN = 2200;
+    var fPos = new Float32Array(fieldN * 3);
+    var fCol = new Float32Array(fieldN * 3);
+    for (var i = 0; i < fieldN; i++) {
+      var fr = 1.95 * Math.sqrt(Math.random());
+      var fa = Math.random() * Math.PI * 2;
+      fPos[i * 3] = Math.cos(fa) * fr;
+      fPos[i * 3 + 1] = Math.sin(fa) * fr;
+      fPos[i * 3 + 2] = 0.15;
+      var fc;
+      if (i % 8 === 0) fc = cyan;
+      else if (i % 3 === 0) fc = white;
+      else fc = violet;
+      var ff = 0.55 + Math.random() * 0.5;
+      fCol[i * 3] = fc[0] * ff;
+      fCol[i * 3 + 1] = fc[1] * ff;
+      fCol[i * 3 + 2] = fc[2] * ff;
+    }
+    var fGeo = new THREE.BufferGeometry();
+    fGeo.setAttribute("position", new THREE.BufferAttribute(fPos, 3));
+    fGeo.setAttribute("color", new THREE.BufferAttribute(fCol, 3));
+    var fMat = new THREE.PointsMaterial({
+      size: 0.022,
+      map: dotTex,
+      transparent: true,
+      opacity: 0.8,
+      vertexColors: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+      sizeAttenuation: false
+    });
+    var field = new THREE.Points(fGeo, fMat);
+    field.renderOrder = -1;
+    root.add(field);
+
+    /* ---- bright sparkles scattered across the whole square ---- */
+    var spkN = 40;
+    var sPos = new Float32Array(spkN * 3);
+    for (var s = 0; s < spkN; s++) {
+      var sr = 1.9 * Math.sqrt(Math.random());
+      var sa = Math.random() * Math.PI * 2;
+      sPos[s * 3] = Math.cos(sa) * sr;
+      sPos[s * 3 + 1] = Math.sin(sa) * sr;
+      sPos[s * 3 + 2] = 0.3;
+    }
+    var sGeo = new THREE.BufferGeometry();
+    sGeo.setAttribute("position", new THREE.BufferAttribute(sPos, 3));
+    var sMat = new THREE.PointsMaterial({
+      size: 0.05,
+      map: dotTex,
+      transparent: true,
+      opacity: 0.9,
+      color: 0xd8ccff,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: false,
+      sizeAttenuation: false
+    });
+    var sparkles = new THREE.Points(sGeo, sMat);
+    sparkles.renderOrder = -1;
+    root.add(sparkles);
+
+    /* ---- faint inner volume for depth ---- */
     var inner = new THREE.Mesh(
-      new THREE.SphereGeometry(R * 0.62, 48, 48),
+      new THREE.SphereGeometry(1.0, 48, 48),
       new THREE.MeshBasicMaterial({
         color: 0x5b21b6,
         transparent: true,
-        opacity: 0.22,
+        opacity: 0.15,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       })
@@ -404,17 +492,17 @@
       sp.scale.set(size, size, 1);
       return sp;
     }
-    var core = makeGlow("168,85,247", 0.85, 2.4);
+    var core = makeGlow("168,85,247", 0.9, 2.0);
     orb.add(core);
-    var coreCyan = makeGlow("34,211,238", 0.25, 1.6);
+    var coreCyan = makeGlow("34,211,238", 0.3, 1.35);
     orb.add(coreCyan);
 
-    var glowMain = makeGlow("124,58,237", 0.65, 3.9);
+    var glowMain = makeGlow("124,58,237", 0.7, 4.2);
     scene.add(glowMain);
-    var glowSoft = makeGlow("192,132,252", 0.35, 3.1);
+    var glowSoft = makeGlow("192,132,252", 0.4, 3.4);
     scene.add(glowSoft);
 
-    /* ---- orbit rings + satellites ---- */
+    /* ---- orbit arcs sweeping across the cloud ---- */
     var ringGroup = new THREE.Group();
     root.add(ringGroup);
 
@@ -426,16 +514,18 @@
         opacity: opacity,
         blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide,
-        depthWrite: false
+        depthWrite: false,
+        depthTest: false
       });
-      var mesh = new THREE.Mesh(new THREE.TorusGeometry(radius, thickness, 8, 180), mat);
+      var mesh = new THREE.Mesh(new THREE.TorusGeometry(radius, thickness, 8, 200), mat);
+      mesh.renderOrder = 2;
       mesh.rotation.set(rx, ry, rz);
       ringGroup.add(mesh);
       rings.push(mesh);
     }
-    addRing(R * 1.55, 0.0045, 0xa78bfa, 0.6, 1.15, 0.35, 0);
-    addRing(R * 1.78, 0.0032, 0x67e8f9, 0.4, -1.25, -0.45, 0.35);
-    addRing(R * 2.0, 0.0026, 0x8b5cf6, 0.32, 0.95, 1.15, -0.25);
+    addRing(1.12, 0.006, 0xc4b5fd, 0.55, 1.2, 0.3, 0);
+    addRing(1.26, 0.004, 0x67e8f9, 0.4, -1.25, -0.5, 0.4);
+    addRing(1.05, 0.003, 0x8b5cf6, 0.45, 0.9, 1.2, -0.3);
 
     /* satellites riding the rings */
     var sats = [];
@@ -444,9 +534,9 @@
       ringGroup.add(sp);
       sats.push({ sprite: sp, ring: ring, radius: radius, angle: Math.random() * Math.PI * 2 });
     }
-    addSat(rings[0], R * 1.55, "34,211,238", 0.34);
-    addSat(rings[1], R * 1.78, "196,181,253", 0.3);
-    addSat(rings[2], R * 2.0, "168,85,247", 0.28);
+    addSat(rings[0], 1.12, "34,211,238", 0.34);
+    addSat(rings[1], 1.26, "196,181,253", 0.3);
+    addSat(rings[2], 1.05, "168,85,247", 0.28);
 
     /* ---- interaction ---- */
     var lastX = 0, lastY = 0;
@@ -465,7 +555,7 @@
         lastX = e.clientX;
         lastY = e.clientY;
         rotY += dx * 0.007;
-        tiltTarget = clamp(tiltTarget + dy * 0.005, -1.25, 1.25);
+        tiltTarget = clamp(tiltTarget + dy * 0.005, -0.25, 0.25);
         inertiaX = dx * 0.0016;
         inertiaY = dy * 0.0011;
       }
@@ -500,7 +590,6 @@
     canvas.classList.add("ready");
 
     if (reduced) {
-      root.rotation.x = tilt;
       orb.rotation.y = rotY;
       renderer.render(scene, camera);
       return;
@@ -518,10 +607,10 @@
       inertiaY *= 0.9;
 
       orb.rotation.y = rotY;
-      tilt += (clamp(tiltTarget, -1.25, 1.25) - tilt) * 0.05;
+      tilt += (clamp(tiltTarget, -0.25, 0.25) - tilt) * 0.05;
       root.rotation.x = tilt;
 
-      ringGroup.rotation.y += 0.0028;
+      ringGroup.rotation.y += 0.003;
 
       sats.forEach(function (s) {
         s.angle += 0.012;
@@ -530,17 +619,17 @@
         p.applyEuler(s.ring.rotation);
         s.sprite.position.copy(p);
         var pulse = 0.75 + 0.35 * Math.sin(time * 2.6 + s.angle);
-        s.sprite.material.opacity = pulse;
-        s.sprite.scale.set(s.sprite.scale.x * 0.99 + (0.2 + 0.22 * pulse), 0, 1);
         var sc = 0.2 + 0.22 * pulse;
         s.sprite.scale.set(sc, sc, 1);
+        s.sprite.material.opacity = pulse;
       });
 
       /* breathing glow */
       var b = 0.85 + 0.12 * Math.sin(time * 1.3);
       core.material.opacity = b;
-      core.scale.set(2.4 * (0.9 + 0.1 * b), 2.4 * (0.9 + 0.1 * b), 1);
+      core.scale.set(2.0 * (0.9 + 0.1 * b), 2.0 * (0.9 + 0.1 * b), 1);
       points.material.opacity = 0.9 + 0.1 * Math.sin(time * 1.1);
+      sparkles.material.opacity = 0.75 + 0.25 * Math.sin(time * 2.2);
 
       camera.position.x += (parX - camera.position.x) * 0.045;
       camera.position.y += (parY - camera.position.y) * 0.045;
