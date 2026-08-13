@@ -87,7 +87,7 @@
       ring.style.top = ry + "px";
       requestAnimationFrame(loop);
     })();
-    var hoverTargets = "a, button, [data-tilt], .tilt, .skill-card";
+    var hoverTargets = "a, button, [data-tilt], .tilt, .skill-card, #globe";
     document.addEventListener("mouseover", function (e) {
       if (e.target.closest(hoverTargets)) ring.classList.add("is-hover");
     });
@@ -133,8 +133,8 @@
 
   /* ---------- 3D tilt with lerp + shine tracking ---------- */
   function bindTilt(el, opts) {
-    var max = (opts && opts.max) || 8;
-    var scale = (opts && opts.scale) || 1.03;
+    var max = (opts && opts.max) || 10;
+    var scale = (opts && opts.scale) || 1.04;
     var t = { x: 0, y: 0, tx: 0, ty: 0, s: 1, ts: 1 };
 
     el.addEventListener("mousemove", function (e) {
@@ -196,7 +196,7 @@
     var W = 0, H = 0;
     var colors = ["167,139,250", "255,255,255", "34,211,238", "192,132,252", "124,58,237"];
     var particles = [];
-    var count = window.innerWidth < 640 ? 60 : 120;
+    var count = window.innerWidth < 640 ? 70 : 140;
 
     function resize() {
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -213,10 +213,10 @@
       return {
         x: Math.random() * W,
         y: Math.random() * H,
-        r: Math.random() * 1.7 + 0.4,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22 - 0.14,
-        a: Math.random() * 0.5 + 0.12,
+        r: Math.random() * 2 + 0.5,
+        vx: (Math.random() - 0.5) * 0.24,
+        vy: (Math.random() - 0.5) * 0.24 - 0.15,
+        a: Math.random() * 0.55 + 0.15,
         tw: Math.random() * Math.PI * 2,
         c: colors[Math.floor(Math.random() * colors.length)]
       };
@@ -262,15 +262,15 @@
   initStardust();
 
   /* ============================================================
-     3D Globe (Three.js) — originkit-style dot-matrix earth
+     Energy Orb (Three.js) — elegant particle core + orbit rings
      ============================================================ */
-  function initGlobe() {
+  function initOrb() {
     var canvas = document.getElementById("globe");
     if (!canvas || !window.THREE) return;
 
-    var wrap = canvas.parentElement;
     var THREE = window.THREE;
-    var RADIUS = 1;
+    var wrap = canvas.parentElement;
+    var R = 1;
 
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -279,38 +279,119 @@
     var camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 0, 3.1);
 
-    var globeGroup = new THREE.Group();
-    globeGroup.rotation.x = 0.42;
-    scene.add(globeGroup);
+    var root = new THREE.Group();
+    root.rotation.x = 0.45;
+    scene.add(root);
+
+    var orb = new THREE.Group();
+    root.add(orb);
 
     var rotY = 0.6;
-    var tilt = 0.42;
-    var tiltTarget = 0.42;
+    var tilt = 0.45;
+    var tiltTarget = 0.45;
     var inertiaX = 0, inertiaY = 0;
     var dragging = false;
-    var hovered = false;
     var visible = true;
     var parX = 0, parY = 0;
+    var time = 0;
 
-    /* ---- ocean sphere ---- */
-    var ocean = new THREE.Mesh(
-      new THREE.SphereGeometry(RADIUS, 64, 64),
-      new THREE.MeshBasicMaterial({ color: 0x0b0b16, transparent: true, opacity: 0.94 })
+    function clamp(v, lo, hi) {
+      return Math.max(lo, Math.min(hi, v));
+    }
+
+    /* ---- soft round point texture ---- */
+    function makeDotTexture() {
+      var s = 64;
+      var c = document.createElement("canvas");
+      c.width = c.height = s;
+      var ctx = c.getContext("2d");
+      var g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+      g.addColorStop(0, "rgba(255,255,255,1)");
+      g.addColorStop(0.35, "rgba(255,255,255,0.65)");
+      g.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, s, s);
+      return new THREE.CanvasTexture(c);
+    }
+    var dotTex = makeDotTexture();
+
+    /* ---- particle sphere (fibonacci distribution) ---- */
+    function fibSphere(n) {
+      var pts = [];
+      var golden = Math.PI * (3 - Math.sqrt(5));
+      for (var i = 0; i < n; i++) {
+        var y = 1 - (i / (n - 1)) * 2;
+        var rad = Math.sqrt(Math.max(0, 1 - y * y));
+        var theta = golden * i;
+        pts.push(new THREE.Vector3(Math.cos(theta) * rad, y, Math.sin(theta) * rad));
+      }
+      return pts;
+    }
+
+    var N = 3200;
+    var base = fibSphere(N);
+    var posArr = new Float32Array(N * 3);
+    var colArr = new Float32Array(N * 3);
+    var white = [235, 240, 255], violet = [197, 181, 253], cyan = [110, 231, 248], deep = [160, 130, 245];
+
+    base.forEach(function (v, i) {
+      var jit = R + (Math.random() - 0.5) * 0.09;
+      posArr[i * 3] = v.x * jit;
+      posArr[i * 3 + 1] = v.y * jit;
+      posArr[i * 3 + 2] = v.z * jit;
+      var col;
+      if (i % 9 === 0) col = cyan;
+      else if (i % 4 === 0) col = white;
+      else if (i % 2 === 0) col = violet;
+      else col = deep;
+      var f = 0.75 + Math.random() * 0.35;
+      colArr[i * 3] = col[0] * f;
+      colArr[i * 3 + 1] = col[1] * f;
+      colArr[i * 3 + 2] = col[2] * f;
+    });
+
+    var pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute("position", new THREE.BufferAttribute(posArr, 3));
+    pGeo.setAttribute("color", new THREE.BufferAttribute(colArr, 3));
+
+    var pMat = new THREE.PointsMaterial({
+      size: 0.05,
+      map: dotTex,
+      transparent: true,
+      opacity: 0.95,
+      vertexColors: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true
+    });
+    var points = new THREE.Points(pGeo, pMat);
+    orb.add(points);
+
+    /* ---- faint inner sphere for depth ---- */
+    var inner = new THREE.Mesh(
+      new THREE.SphereGeometry(R * 0.62, 48, 48),
+      new THREE.MeshBasicMaterial({
+        color: 0x5b21b6,
+        transparent: true,
+        opacity: 0.22,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      })
     );
-    globeGroup.add(ocean);
+    orb.add(inner);
 
-    /* ---- atmosphere glow sprite ---- */
+    /* ---- glowing core ---- */
     function makeGlow(rgb, opacity, size) {
       var s = 256;
       var c = document.createElement("canvas");
       c.width = c.height = s;
-      var cx = c.getContext("2d");
-      var g = cx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+      var ctx = c.getContext("2d");
+      var g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
       g.addColorStop(0, "rgba(" + rgb + ",1)");
       g.addColorStop(0.35, "rgba(" + rgb + ",0.4)");
       g.addColorStop(1, "rgba(" + rgb + ",0)");
-      cx.fillStyle = g;
-      cx.fillRect(0, 0, s, s);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, s, s);
       var sp = new THREE.Sprite(
         new THREE.SpriteMaterial({
           map: new THREE.CanvasTexture(c),
@@ -323,114 +404,52 @@
       sp.scale.set(size, size, 1);
       return sp;
     }
-    var glowMain = makeGlow("124,58,237", 0.55, 3.4);
+    var core = makeGlow("168,85,247", 0.85, 2.4);
+    orb.add(core);
+    var coreCyan = makeGlow("34,211,238", 0.25, 1.6);
+    orb.add(coreCyan);
+
+    var glowMain = makeGlow("124,58,237", 0.65, 3.9);
     scene.add(glowMain);
-    var glowCyan = makeGlow("34,211,238", 0.18, 2.9);
-    scene.add(glowCyan);
+    var glowSoft = makeGlow("192,132,252", 0.35, 3.1);
+    scene.add(glowSoft);
 
-    /* ---- graticule grid lines ---- */
-    var gridMat = new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.25 });
-    function addLatCircle(lat) {
-      var pts = [];
-      for (var i = 0; i <= 72; i++) {
-        var lng = (i / 72) * 360 - 180;
-        pts.push(llToVec(lat, lng, RADIUS * 1.006));
-      }
-      var geo = new THREE.BufferGeometry().setFromPoints(pts);
-      globeGroup.add(new THREE.Line(geo, gridMat));
-    }
-    function addLonCircle(lng) {
-      var pts = [];
-      for (var i = 0; i <= 72; i++) {
-        var lat = (i / 72) * 180 - 90;
-        pts.push(llToVec(lat, lng, RADIUS * 1.006));
-      }
-      var geo = new THREE.BufferGeometry().setFromPoints(pts);
-      globeGroup.add(new THREE.Line(geo, gridMat));
-    }
-    for (var lat = -60; lat <= 60; lat += 15) addLatCircle(lat);
-    for (var lng = 0; lng < 360; lng += 15) addLonCircle(lng);
+    /* ---- orbit rings + satellites ---- */
+    var ringGroup = new THREE.Group();
+    root.add(ringGroup);
 
-    function llToVec(lat, lng, r) {
-      var phi = (90 - lat) * Math.PI / 180;
-      var theta = (lng + 180) * Math.PI / 180;
-      return new THREE.Vector3(
-        r * Math.sin(phi) * Math.cos(theta),
-        r * Math.cos(phi),
-        r * Math.sin(phi) * Math.sin(theta)
-      );
-    }
-
-    /* ---- land dots from real geojson ---- */
-    function buildDots(data) {
-      var MW = 2048, MH = 1024;
-      var cv = document.createElement("canvas");
-      cv.width = MW; cv.height = MH;
-      var cx = cv.getContext("2d", { willReadFrequently: true });
-      cx.fillStyle = "#000";
-      cx.fillRect(0, 0, MW, MH);
-      cx.fillStyle = "#fff";
-      data.features.forEach(function (f) {
-        var geom = f.geometry;
-        if (!geom || geom.type !== "Polygon" && geom.type !== "MultiPolygon") return;
-        var polys = geom.type === "Polygon" ? [geom.coordinates] : geom.coordinates;
-        polys.forEach(function (poly) {
-          cx.beginPath();
-          poly.forEach(function (ring) {
-            ring.forEach(function (pt, i) {
-              var x = (pt[0] + 180) / 360 * MW;
-              var y = (90 - pt[1]) / 180 * MH;
-              if (i === 0) cx.moveTo(x, y);
-              else cx.lineTo(x, y);
-            });
-            cx.closePath();
-          });
-          cx.fill();
-        });
+    var rings = [];
+    function addRing(radius, thickness, color, opacity, rx, ry, rz) {
+      var mat = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: opacity,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide,
+        depthWrite: false
       });
-      var img = cx.getImageData(0, 0, MW, MH).data;
-      var dots = [];
-      var step = 4;
-      for (var y = 0; y < MH; y += step) {
-        for (var x = 0; x < MW; x += step) {
-          if (img[(y * MW + x) * 4 + 3] > 128) {
-            var la = 90 - (y / MH) * 180;
-            var lo = (x / MW) * 360 - 180;
-            dots.push(llToVec(la, lo, RADIUS * 1.002));
-          }
-        }
-      }
-      return dots;
+      var mesh = new THREE.Mesh(new THREE.TorusGeometry(radius, thickness, 8, 180), mat);
+      mesh.rotation.set(rx, ry, rz);
+      ringGroup.add(mesh);
+      rings.push(mesh);
     }
+    addRing(R * 1.55, 0.0045, 0xa78bfa, 0.6, 1.15, 0.35, 0);
+    addRing(R * 1.78, 0.0032, 0x67e8f9, 0.4, -1.25, -0.45, 0.35);
+    addRing(R * 2.0, 0.0026, 0x8b5cf6, 0.32, 0.95, 1.15, -0.25);
 
-    function addDots(dots) {
-      if (!dots.length) return;
-      var aCount = 0, bCount = 0;
-      dots.forEach(function (_, i) { if (i % 7 === 0) bCount++; else aCount++; });
-      var dotGeo = new THREE.SphereGeometry(RADIUS * 0.017, 4, 4);
-      var matPurple = new THREE.MeshBasicMaterial({ color: 0x8b5cf6 });
-      var matBright = new THREE.MeshBasicMaterial({ color: 0x5eead4 });
-      var meshA = new THREE.InstancedMesh(dotGeo, matPurple, aCount);
-      var meshB = new THREE.InstancedMesh(dotGeo, matBright, bCount);
-      var m = new THREE.Matrix4();
-      var ai = 0, bi = 0;
-      dots.forEach(function (p, i) {
-        if (i % 7 === 0) {
-          meshB.setMatrixAt(bi++, m.setPosition(p.x, p.y, p.z));
-        } else {
-          meshA.setMatrixAt(ai++, m.setPosition(p.x, p.y, p.z));
-        }
-      });
-      globeGroup.add(meshA);
-      globeGroup.add(meshB);
+    /* satellites riding the rings */
+    var sats = [];
+    function addSat(ring, radius, color, size) {
+      var sp = makeGlow(color, 1, size);
+      ringGroup.add(sp);
+      sats.push({ sprite: sp, ring: ring, radius: radius, angle: Math.random() * Math.PI * 2 });
     }
+    addSat(rings[0], R * 1.55, "34,211,238", 0.34);
+    addSat(rings[1], R * 1.78, "196,181,253", 0.3);
+    addSat(rings[2], R * 2.0, "168,85,247", 0.28);
 
     /* ---- interaction ---- */
-    var raycaster = new THREE.Raycaster();
-    var mouse = new THREE.Vector2();
-    var lastHover = 0;
     var lastX = 0, lastY = 0;
-
     canvas.addEventListener("pointerdown", function (e) {
       dragging = true;
       canvas.classList.add("grabbing");
@@ -460,21 +479,6 @@
         canvas.classList.remove("grabbing");
       }
     });
-    canvas.addEventListener("pointermove", function (e) {
-      var r = canvas.getBoundingClientRect();
-      mouse.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      mouse.y = -((e.clientY - r.top) / r.height) * 2 + 1;
-      var now = performance.now();
-      if (now - lastHover > 90) {
-        lastHover = now;
-        raycaster.setFromCamera(mouse, camera);
-        hovered = raycaster.intersectObject(ocean, false).length > 0;
-      }
-    });
-
-    function clamp(v, lo, hi) {
-      return Math.max(lo, Math.min(hi, v));
-    }
 
     function resize() {
       var w = wrap.clientWidth;
@@ -492,38 +496,58 @@
     }, { rootMargin: "240px" });
     inView.observe(wrap);
 
-    /* ---- load data + run ---- */
-    fetch("ne_50m_land.json")
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        addDots(buildDots(data));
-        canvas.classList.add("ready");
-        if (reduced) {
-          globeGroup.rotation.y = rotY;
-          globeGroup.rotation.x = tilt;
-          renderer.render(scene, camera);
-          return;
-        }
-        (function tick() {
-          requestAnimationFrame(tick);
-          if (!visible) return;
-          if (!dragging && !hovered) rotY += 0.0032;
-          rotY += inertiaX;
-          tiltTarget += inertiaY;
-          inertiaX *= 0.9;
-          inertiaY *= 0.9;
-          globeGroup.rotation.y = rotY;
-          tilt += (clamp(tiltTarget, -1.25, 1.25) - tilt) * 0.05;
-          globeGroup.rotation.x = tilt;
-          camera.position.x += (parX - camera.position.x) * 0.045;
-          camera.position.y += (parY - camera.position.y) * 0.045;
-          camera.lookAt(0, 0, 0);
-          renderer.render(scene, camera);
-        })();
-      })
-      .catch(function () {
-        canvas.classList.add("ready");
+    /* ---- run ---- */
+    canvas.classList.add("ready");
+
+    if (reduced) {
+      root.rotation.x = tilt;
+      orb.rotation.y = rotY;
+      renderer.render(scene, camera);
+      return;
+    }
+
+    (function tick() {
+      requestAnimationFrame(tick);
+      time += 0.016;
+      if (!visible) return;
+
+      if (!dragging) rotY += 0.0022;
+      rotY += inertiaX;
+      tiltTarget += inertiaY;
+      inertiaX *= 0.9;
+      inertiaY *= 0.9;
+
+      orb.rotation.y = rotY;
+      tilt += (clamp(tiltTarget, -1.25, 1.25) - tilt) * 0.05;
+      root.rotation.x = tilt;
+
+      ringGroup.rotation.y += 0.0028;
+
+      sats.forEach(function (s) {
+        s.angle += 0.012;
+        var a = s.angle;
+        var p = new THREE.Vector3(Math.cos(a) * s.radius, 0, Math.sin(a) * s.radius);
+        p.applyEuler(s.ring.rotation);
+        s.sprite.position.copy(p);
+        var pulse = 0.75 + 0.35 * Math.sin(time * 2.6 + s.angle);
+        s.sprite.material.opacity = pulse;
+        s.sprite.scale.set(s.sprite.scale.x * 0.99 + (0.2 + 0.22 * pulse), 0, 1);
+        var sc = 0.2 + 0.22 * pulse;
+        s.sprite.scale.set(sc, sc, 1);
       });
+
+      /* breathing glow */
+      var b = 0.85 + 0.12 * Math.sin(time * 1.3);
+      core.material.opacity = b;
+      core.scale.set(2.4 * (0.9 + 0.1 * b), 2.4 * (0.9 + 0.1 * b), 1);
+      points.material.opacity = 0.9 + 0.1 * Math.sin(time * 1.1);
+
+      camera.position.x += (parX - camera.position.x) * 0.045;
+      camera.position.y += (parY - camera.position.y) * 0.045;
+      camera.lookAt(0, 0, 0);
+
+      renderer.render(scene, camera);
+    })();
   }
-  initGlobe();
+  initOrb();
 })();
