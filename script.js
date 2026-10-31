@@ -1,369 +1,406 @@
-(function () {
-  "use strict";
+/* ============================================================
+   AmirHossein — portfolio
+   WebGL particle scene + DOM
+   ============================================================ */
 
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+import * as THREE from "three";
 
-  /* ---------- Skills grid ---------- */
-  var skills = ["TypeScript", "Node.js", "React", "PHP", "Java", "CSS / HTML", "C#"];
-  var grid = document.getElementById("skills-grid");
-  if (grid) {
-    skills.forEach(function (s, i) {
-      var card = document.createElement("div");
-      card.className = "skill-card";
-      card.setAttribute("data-tilt", "");
-      card.style.animationDelay = (i * 0.08) + "s";
-      card.innerHTML =
-        '<span class="skill-idx">' + String(i + 1).padStart(2, "0") + "</span>" +
-        '<span class="skill-glow" aria-hidden="true"></span>' +
-        s;
-      grid.appendChild(card);
-    });
-  }
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = (s, r = document) => r.querySelector(s);
 
-  /* ---------- Scroll reveal ---------- */
-  var revealEls = Array.prototype.slice.call(document.querySelectorAll("[data-reveal]"));
+/* ── content ─────────────────────────────────────────────── */
 
-  function inView(el) {
-    var r = el.getBoundingClientRect();
-    return r.top < window.innerHeight - 40 && r.bottom > 0;
-  }
+const SKILLS = [
+  ["TypeScript", "Daily"],
+  ["JavaScript", "Daily"],
+  ["Node.js", "Daily"],
+  ["React", "Daily"],
+  ["PHP", "Regular"],
+  ["Java", "Regular"],
+  ["C#", "Regular"],
+  ["HTML / CSS", "Daily"],
+  ["Git & GitHub", "Daily"],
+  ["Linux / Bash", "Daily"],
+];
 
-  function markVisible() {
-    revealEls.forEach(function (el) {
-      if (inView(el)) el.classList.add("in");
-    });
-  }
+const WORK = [
+  {
+    name: "GuardNet",
+    desc: "Privacy-first networking suite — fast, auditable, built to stay out of your way.",
+    tags: ["TypeScript", "Node.js"],
+    href: "https://github.com/localvps/guardnet",
+  },
+  {
+    name: "Pixel Perfect",
+    desc: "A pixel-accurate UI reconstruction playground for sharp front-end craft.",
+    tags: ["React", "CSS"],
+    href: "https://github.com/localvps/pixel-perfect",
+  },
+  {
+    name: "GuardVPN",
+    desc: "A streamlined SSH tunnel manager for fast, reliable VPN connections.",
+    tags: ["Shell", "Bash"],
+    href: "https://github.com/localvps/guardvpn",
+  },
+  {
+    name: "Riyazigo",
+    desc: "A practice-and-progress platform, tuned for quick daily reps.",
+    tags: ["PHP", "MySQL"],
+    href: "https://github.com/localvps/Rayazi-Go",
+  },
+  {
+    name: "The Whispering Dungeon",
+    desc: "A free browser dungeon-crawl adventure — explorable, playable, no install.",
+    tags: ["HTML", "JS"],
+    href: "https://github.com/localvps/whispering-dungeon",
+  },
+];
 
-  if ("IntersectionObserver" in window && !reduced) {
-    var io = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-    );
-    revealEls.forEach(function (el) { io.observe(el); });
-  } else {
-    revealEls.forEach(function (el) { el.classList.add("in"); });
-  }
+/* ── render lists ────────────────────────────────────────── */
 
-  window.addEventListener("load", markVisible);
-  setTimeout(markVisible, 900);
+$("#skills-list").innerHTML = SKILLS.map(
+  ([name, lvl], i) => `
+    <li>
+      <span class="n">${String(i + 1).padStart(2, "0")}</span>
+      <span class="name">${name}</span>
+      <span class="lvl">${lvl}</span>
+    </li>`
+).join("");
 
-  /* ---------- Progress bar + nav ---------- */
-  var progressBar = document.querySelector(".progress span");
-  var nav = document.querySelector(".nav");
-  function onScroll() {
-    var h = document.documentElement;
-    var max = h.scrollHeight - h.clientHeight;
-    var p = max > 0 ? (h.scrollTop || window.pageYOffset) / max : 0;
-    if (progressBar) progressBar.style.width = p * 100 + "%";
-    if (nav) nav.classList.toggle("scrolled", (h.scrollTop || window.pageYOffset) > 30);
-  }
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
+$("#work-list").innerHTML = WORK.map(
+  (w, i) => `
+    <a class="work-item" href="${w.href}" target="_blank" rel="noopener">
+      <span class="work-idx">${String(i + 1).padStart(2, "0")}</span>
+      <span>
+        <h3 class="work-title">${w.name}</h3>
+        <p class="work-desc">${w.desc}</p>
+      </span>
+      <span class="work-tags">${w.tags.map((t) => `<span>${t}</span>`).join("")}</span>
+      <span class="work-arrow">↗</span>
+    </a>`
+).join("");
 
-  /* ---------- Custom cursor ---------- */
-  var dot = document.querySelector(".cursor-dot");
-  var ring = document.querySelector(".cursor-ring");
-  if (dot && ring && finePointer && !reduced) {
-    document.body.classList.add("custom-cursor");
-    var mx = -100, my = -100, rx = -100, ry = -100;
-    document.addEventListener("mousemove", function (e) {
-      mx = e.clientX;
-      my = e.clientY;
-      dot.style.left = mx + "px";
-      dot.style.top = my + "px";
-    });
-    (function loop() {
-      rx += (mx - rx) * 0.18;
-      ry += (my - ry) * 0.18;
-      ring.style.left = rx + "px";
-      ring.style.top = ry + "px";
-      requestAnimationFrame(loop);
-    })();
-    var hoverTargets = "a, button, [data-tilt], .tilt, .skill-card, .term-card";
-    document.addEventListener("mouseover", function (e) {
-      if (e.target.closest(hoverTargets)) ring.classList.add("is-hover");
-    });
-    document.addEventListener("mouseout", function (e) {
-      if (e.target.closest(hoverTargets)) ring.classList.remove("is-hover");
-    });
-    document.addEventListener("mouseleave", function () {
-      ring.style.opacity = "0";
-      dot.style.opacity = "0";
-    });
-    document.addEventListener("mouseenter", function () {
-      ring.style.opacity = "1";
-      dot.style.opacity = "1";
-    });
-  }
+/* ── split hero chars for stagger ────────────────────────── */
 
-  /* ---------- Magnetic buttons (spring-smoothed) ---------- */
-  if (finePointer && !reduced) {
-    document.querySelectorAll(".magnetic").forEach(function (el) {
-      var strength = 0.32;
-      var tx = 0, ty = 0, x = 0, y = 0, on = false;
-      el.addEventListener("mousemove", function (e) {
-        var r = el.getBoundingClientRect();
-        tx = (e.clientX - r.left - r.width / 2) * strength;
-        ty = (e.clientY - r.top - r.height / 2) * strength;
-        if (!on) { on = true; requestAnimationFrame(loop); }
-      });
-      el.addEventListener("mouseleave", function () {
-        tx = 0; ty = 0;
-      });
-      function loop() {
-        x += (tx - x) * 0.2;
-        y += (ty - y) * 0.2;
-        el.style.transform = "translate(" + x.toFixed(2) + "px," + y.toFixed(2) + "px)";
-        if (Math.abs(tx - x) > 0.05 || Math.abs(ty - y) > 0.05) {
-          requestAnimationFrame(loop);
-        } else {
-          on = false;
-        }
+document.querySelectorAll(".hero-title .word").forEach((word) => {
+  const base = parseFloat(getComputedStyle(word).getPropertyValue("--d") || 0);
+  [...word.querySelectorAll(".ch")].forEach((ch, i) => {
+    ch.style.setProperty("--i", i);
+    ch.style.animationDelay = `calc(.25s + ${base * 0.12}s + ${i * 0.045}s)`;
+  });
+});
+
+/* ── reveal on scroll ────────────────────────────────────── */
+
+const revealIO = new IntersectionObserver(
+  (entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.add("in");
+        revealIO.unobserve(e.target);
       }
+    }
+  },
+  { rootMargin: "0px 0px -12% 0px", threshold: 0.08 }
+);
+document.querySelectorAll(".rv").forEach((el) => revealIO.observe(el));
+
+/* ── nav / progress / cursor ─────────────────────────────── */
+
+const nav = $(".nav");
+const bar = $(".progress span");
+const cursor = $(".cursor");
+let pointer = { x: innerWidth / 2, y: innerHeight / 2 };
+let cursorPos = { ...pointer };
+
+addEventListener("pointermove", (e) => {
+  pointer.x = e.clientX;
+  pointer.y = e.clientY;
+  document.documentElement.style.setProperty("--mx", e.clientX + "px");
+  document.documentElement.style.setProperty("--my", e.clientY + "px");
+});
+
+document.querySelectorAll("a, button").forEach((el) => {
+  el.addEventListener("pointerenter", () => cursor.classList.add("is-hot"));
+  el.addEventListener("pointerleave", () => cursor.classList.remove("is-hot"));
+});
+
+function tickCursor() {
+  cursorPos.x += (pointer.x - cursorPos.x) * 0.16;
+  cursorPos.y += (pointer.y - cursorPos.y) * 0.16;
+  cursor.style.transform = `translate(${cursorPos.x}px, ${cursorPos.y}px)`;
+  requestAnimationFrame(tickCursor);
+}
+if (!reduced) tickCursor();
+
+let scrollY = 0;
+function onScroll() {
+  scrollY = window.scrollY;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const p = max > 0 ? scrollY / max : 0;
+  bar.style.width = (p * 100).toFixed(2) + "%";
+  nav.classList.toggle("is-stuck", scrollY > 40);
+}
+addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+
+/* ── scene names ─────────────────────────────────────────── */
+
+const SCENE_NAMES = ["sphere", "knot", "helix", "wave"];
+const sceneNameEl = $("#scene-name");
+
+/* ============================================================
+   WebGL
+   ============================================================ */
+
+const canvas = $("#webgl");
+let renderer, scene, camera, points, geo;
+
+const COUNT = 14000;
+const positions = new Float32Array(COUNT * 3);
+const targets = [new Float32Array(COUNT * 3), new Float32Array(COUNT * 3), new Float32Array(COUNT * 3), new Float32Array(COUNT * 3)];
+const colors = new Float32Array(COUNT * 3);
+
+const C_ACCENT = new THREE.Color("#ff5a3c");
+const C_VIOLET = new THREE.Color("#7f6bff");
+const C_ICE = new THREE.Color("#d9e2ff");
+
+/* --- shape generators ------------------------------------- */
+
+function genSphere(a) {
+  const R = 26;
+  const phi = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < COUNT; i++) {
+    const y = 1 - (i / (COUNT - 1)) * 2;
+    const r = Math.sqrt(1 - y * y);
+    const th = phi * i;
+    const jitter = 0.94 + Math.random() * 0.12;
+    a[i * 3] = Math.cos(th) * r * R * jitter;
+    a[i * 3 + 1] = y * R * jitter;
+    a[i * 3 + 2] = Math.sin(th) * r * R * jitter;
+  }
+}
+
+function genKnot(a) {
+  // (2,3) torus knot, points spread across the tube cross-section
+  const p = 2, q = 3, R = 20, r = 8;
+  for (let i = 0; i < COUNT; i++) {
+    const u = (i / COUNT) * Math.PI * 2;
+    const cx = Math.cos(p * u) * (R + Math.cos(q * u) * r);
+    const cy = Math.sin(p * u) * (R + Math.cos(q * u) * r);
+    const cz = Math.sin(q * u) * r;
+
+    const ang = Math.random() * Math.PI * 2;
+    const rad = Math.pow(Math.random(), 0.62) * 2.4;
+    // a ring perpendicular-ish to the curve
+    const nx = Math.cos(ang) * rad;
+    const ny = Math.sin(ang) * rad;
+
+    a[i * 3] = cx * 1.15 + nx;
+    a[i * 3 + 1] = cy * 1.15 + ny;
+    a[i * 3 + 2] = cz * 1.9 + nx * 0.5;
+  }
+}
+
+function genHelix(a) {
+  for (let i = 0; i < COUNT; i++) {
+    const strand = i % 2;
+    const t = (Math.floor(i / 2) / (COUNT / 2)) * Math.PI * 2 * 3.2;
+    const rad = 13;
+    const y = (Math.floor(i / 2) / (COUNT / 2) - 0.5) * 62;
+    const ang = t + strand * Math.PI;
+    const wob = 1 + Math.sin(t * 0.5) * 0.06;
+    a[i * 3] = Math.cos(ang) * rad * wob + (Math.random() - 0.5) * 1.2;
+    a[i * 3 + 1] = y + (Math.random() - 0.5) * 1.2;
+    a[i * 3 + 2] = Math.sin(ang) * rad * wob + (Math.random() - 0.5) * 1.2;
+  }
+}
+
+function genWave(a) {
+  const W = 62, D = 42;
+  for (let i = 0; i < COUNT; i++) {
+    const u = Math.random();
+    const v = Math.random();
+    const x = (u - 0.5) * W;
+    const z = (v - 0.5) * D;
+    const d = Math.sqrt(x * x + z * z);
+    a[i * 3] = x;
+    a[i * 3 + 1] = Math.sin(d * 0.32) * 6 * Math.exp(-d * 0.03) - 4;
+    a[i * 3 + 2] = z;
+  }
+}
+
+function buildTargets() {
+  genSphere(targets[0]);
+  genKnot(targets[1]);
+  genHelix(targets[2]);
+  genWave(targets[3]);
+
+  // seed current positions from sphere
+  positions.set(targets[0]);
+
+  const c = new THREE.Color();
+  for (let i = 0; i < COUNT; i++) {
+    const t = i / COUNT;
+    if (t < 0.55) c.copy(C_ICE).lerp(C_VIOLET, t / 0.55);
+    else c.copy(C_VIOLET).lerp(C_ACCENT, (t - 0.55) / 0.45);
+    const k = 0.55 + Math.random() * 0.45;
+    colors[i * 3] = c.r * k;
+    colors[i * 3 + 1] = c.g * k;
+    colors[i * 3 + 2] = c.b * k;
+  }
+}
+
+/* --- init ------------------------------------------------- */
+
+function initGL() {
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: false,
+      alpha: true,
+      powerPreference: "high-performance",
     });
+  } catch {
+    canvas.style.display = "none";
+    return;
   }
 
-  /* ---------- 3D tilt with lerp + shine tracking ---------- */
-  function bindTilt(el, opts) {
-    var max = (opts && opts.max) || 10;
-    var scale = (opts && opts.scale) || 1.04;
-    var t = { x: 0, y: 0, tx: 0, ty: 0, s: 1, ts: 1 };
+  const mobile = innerWidth < 720;
+  const DPR = Math.min(devicePixelRatio || 1, mobile ? 1.35 : 1.75);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0x000000, 0);
 
-    el.addEventListener("mousemove", function (e) {
-      var r = el.getBoundingClientRect();
-      var nx = (e.clientX - r.left) / r.width - 0.5;
-      var ny = (e.clientY - r.top) / r.height - 0.5;
-      t.ty = nx * max;
-      t.tx = -ny * max * 0.7;
-      t.ts = scale;
-      el.style.setProperty("--gx", ((nx + 0.5) * 100).toFixed(2) + "%");
-      el.style.setProperty("--gy", ((ny + 0.5) * 100).toFixed(2) + "%");
-    });
-    el.addEventListener("mouseleave", function () {
-      t.tx = 0; t.ty = 0; t.ts = 1;
-    });
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x07080a, 0.0135);
 
-    (function loop() {
-      t.x += (t.tx - t.x) * 0.12;
-      t.y += (t.ty - t.y) * 0.12;
-      t.s += (t.ts - t.s) * 0.12;
-      el.style.transform =
-        "perspective(900px) rotateX(" + t.x.toFixed(2) + "deg) rotateY(" +
-        t.y.toFixed(2) + "deg) scale(" + t.s.toFixed(3) + ")";
-      requestAnimationFrame(loop);
-    })();
-  }
+  camera = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.1, 400);
+  camera.position.set(0, 0, innerWidth < 720 ? 120 : 78);
 
-  if (finePointer && !reduced) {
-    document.querySelectorAll("[data-tilt], .tilt").forEach(function (el) {
-      bindTilt(el, { max: 10, scale: 1.04 });
-    });
-  }
+  buildTargets();
 
-  /* ---------- Spotlight on work card ---------- */
-  if (finePointer) {
-    document.querySelectorAll(".work-card").forEach(function (el) {
-      el.addEventListener("mousemove", function (e) {
-        var r = el.getBoundingClientRect();
-        el.style.setProperty("--mx", ((e.clientX - r.left) / r.width) * 100 + "%");
-        el.style.setProperty("--my", ((e.clientY - r.top) / r.height) * 100 + "%");
-      });
-    });
-    document.querySelectorAll(".contact-link").forEach(function (el) {
-      el.addEventListener("mousemove", function (e) {
-        var r = el.getBoundingClientRect();
-        el.style.setProperty("--gx", ((e.clientX - r.left) / r.width) * 100 + "%");
-        el.style.setProperty("--gy", ((e.clientY - r.top) / r.height) * 100 + "%");
-      });
-    });
-  }
+  geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-  /* ============================================================
-     Stardust particle background
-     ============================================================ */
-  function initStardust() {
-    var canvas = document.getElementById("stardust");
-    if (!canvas) return;
-    var ctx = canvas.getContext("2d");
-    var W = 0, H = 0;
-    var colors = ["167,139,250", "255,255,255", "34,211,238", "192,132,252", "124,58,237"];
-    var particles = [];
-    var count = window.innerWidth < 640 ? 70 : 140;
-
-    function resize() {
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = window.innerWidth;
-      H = window.innerHeight;
-      canvas.width = W * dpr;
-      canvas.height = H * dpr;
-      canvas.style.width = W + "px";
-      canvas.style.height = H + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function make() {
-      return {
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: Math.random() * 2 + 0.5,
-        vx: (Math.random() - 0.5) * 0.24,
-        vy: (Math.random() - 0.5) * 0.24 - 0.15,
-        a: Math.random() * 0.55 + 0.15,
-        tw: Math.random() * Math.PI * 2,
-        c: colors[Math.floor(Math.random() * colors.length)]
-      };
-    }
-
-    function drawStatic() {
-      ctx.clearRect(0, 0, W, H);
-      particles.forEach(function (p) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(" + p.c + "," + p.a + ")";
-        ctx.fill();
-      });
-    }
-
-    resize();
-    for (var i = 0; i < count; i++) particles.push(make());
-
-    if (!reduced) {
-      (function tick() {
-        requestAnimationFrame(tick);
-        ctx.clearRect(0, 0, W, H);
-        particles.forEach(function (p) {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.tw += 0.035;
-          var alpha = p.a * (0.55 + 0.45 * Math.sin(p.tw));
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(" + p.c + "," + alpha.toFixed(3) + ")";
-          ctx.fill();
-          if (p.y < -20) p.y = H + 20;
-          if (p.x < -20) p.x = W + 20;
-          if (p.x > W + 20) p.x = -20;
-        });
-      })();
-    } else {
-      drawStatic();
-    }
-
-    window.addEventListener("resize", resize);
-  }
-  initStardust();
-
-  /* ============================================================
-     Terminal card — simple typewriter loop
-     ============================================================ */
-  function initTerminal() {
-    var body = document.getElementById("term-body");
-    if (!body) return;
-
-    var script = [
-      { cmd: "whoami", out: "localvps" },
-      { cmd: "cat skills.txt", out: "TypeScript  ·  Node.js  ·  React  ·  PHP  ·  C#" },
-      { cmd: "./status --live", out: "<span class='ok'>●</span>  Open to work" }
-    ];
-
-    function buildPrompt() {
-      var row = document.createElement("div");
-      row.className = "t-row";
-      var prompt = document.createElement("span");
-      prompt.className = "t-prompt";
-      prompt.textContent = "➜";
-      var cmd = document.createElement("span");
-      cmd.className = "t-cmd";
-      row.appendChild(prompt);
-      row.appendChild(cmd);
-      return { row: row, cmd: cmd };
-    }
-
-    function buildOutput(text, cls) {
-      var p = document.createElement("p");
-      p.className = "t-out";
-      p.innerHTML = text;
-      return p;
-    }
-
-    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    function renderAll() {
-      body.innerHTML = "";
-      script.forEach(function (s) {
-        var b = buildPrompt();
-        b.cmd.textContent = s.cmd;
-        body.appendChild(b.row);
-        body.appendChild(buildOutput(s.out));
-      });
-      var c = document.createElement("span");
-      c.className = "term-cursor";
-      body.appendChild(c);
-    }
-
-    if (reduced) { renderAll(); return; }
-
-    var typing = false;
-
-    function start() {
-      if (typing) return;
-      typing = true;
-      body.innerHTML = "";
-      var idx = 0;
-      var cursor = document.createElement("span");
-      cursor.className = "term-cursor";
-      body.appendChild(cursor);
-
-      function nextLine() {
-        if (idx >= script.length) {
-          typing = false;
-          return;
-        }
-        var s = script[idx];
-        var b = buildPrompt();
-        var ci = 0;
-        body.insertBefore(b.row, cursor);
-        (function type() {
-          if (ci < s.cmd.length) {
-            b.cmd.textContent = s.cmd.slice(0, ci + 1);
-            ci++;
-            setTimeout(type, 46);
-          } else {
-            body.insertBefore(buildOutput(s.out), cursor);
-            idx++;
-            setTimeout(nextLine, 420);
-          }
-        })();
+  const mat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+      uSize: { value: DPR * 300 },
+      uOpacity: { value: mobile ? 0.62 : 1 },
+    },
+    vertexShader: /* glsl */ `
+      uniform float uSize;
+      attribute vec3 color;
+      varying vec3 vColor;
+      varying float vDepth;
+      void main() {
+        vColor = color;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vDepth = -mv.z;
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = uSize * (1.0 / max(vDepth, 1.0));
+        gl_PointSize = clamp(gl_PointSize, 0.6, 9.0);
       }
-      nextLine();
-    }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform float uOpacity;
+      varying vec3 vColor;
+      varying float vDepth;
+      void main() {
+        vec2 uv = gl_PointCoord - 0.5;
+        float d = length(uv);
+        if (d > 0.5) discard;
+        float a = smoothstep(0.5, 0.05, d);
+        float fade = smoothstep(230.0, 40.0, vDepth);
+        gl_FragColor = vec4(vColor, a * fade * uOpacity * 0.9);
+      }
+    `,
+  });
 
-    /* start when the stage scrolls into view */
-    if ("IntersectionObserver" in window) {
-      var stage = document.getElementById("hero-stage") || body.parentElement;
-      var io = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (e) {
-            if (e.isIntersecting) {
-              start();
-              io.unobserve(e.target);
-            }
-          });
-        },
-        { rootMargin: "300px" }
-      );
-      io.observe(stage);
-    } else {
-      start();
-    }
+  points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  addEventListener("resize", () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+}
+
+/* --- morph ------------------------------------------------- */
+
+let active = 0;
+let morph = 1;              // 1 = settled on `active`
+let from = new Float32Array(COUNT * 3);
+const rot = { x: 0, y: 0, tx: 0, ty: 0 };
+let pageMax = 1;
+
+function smoothstep(a, b, x) {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+}
+
+function frame(t) {
+  if (!renderer) return;
+  requestAnimationFrame(frame);
+
+  const time = t * 0.001;
+
+  // which scene are we targeting, based on scroll
+  pageMax = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+  const p = Math.min(1, Math.max(0, scrollY / pageMax));
+  const wanted = Math.round(p * (SCENE_NAMES.length - 1));
+
+  if (wanted !== active) {
+    from.set(positions);
+    morph = 0;
+    active = wanted;
+    if (sceneNameEl) sceneNameEl.textContent = SCENE_NAMES[wanted];
   }
-  initTerminal();
-})();
+
+  // ease current -> target positions
+  if (morph < 1) {
+    morph = Math.min(1, morph + 0.017);
+    const e = smoothstep(0, 1, morph);
+    const dst = targets[active];
+    for (let i = 0; i < COUNT * 3; i++) {
+      positions[i] = from[i] + (dst[i] - from[i]) * e;
+    }
+    geo.attributes.position.needsUpdate = true;
+  }
+
+  // gentle drift + parallax
+  const mx = (pointer.x / innerWidth - 0.5);
+  const my = (pointer.y / innerHeight - 0.5);
+  rot.tx = -my * 0.32;
+  rot.ty = mx * 0.5;
+  rot.x += (rot.tx - rot.x) * 0.045;
+  rot.y += (rot.ty - rot.y) * 0.045;
+
+  points.rotation.x = rot.x + Math.sin(time * 0.13) * 0.06;
+  points.rotation.y = rot.y + time * 0.045;
+  points.position.y = Math.sin(time * 0.4) * 0.8;
+
+  // camera breathes in slightly on lower scenes
+  const cz = (innerWidth < 720 ? 120 : 78) - p * 10;
+  camera.position.z += (cz - camera.position.z) * 0.05;
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+}
+
+if (!reduced) {
+  initGL();
+  if (renderer) requestAnimationFrame(frame);
+} else {
+  // static fallback: hide canvas, keep DOM
+  canvas.style.display = "none";
+}
+
+/* ── final polish: year ──────────────────────────────────── */
+const yearEl = document.querySelector(".footer span");
+if (yearEl) yearEl.textContent = `© ${new Date().getFullYear()} AmirHossein`;

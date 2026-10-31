@@ -1,220 +1,179 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AmirHossein — Full-Stack Developer</title>
-  <meta name="description" content="Portfolio and resume of AmirHossein — a full-stack developer building fast, modern web products." />
-  <meta name="theme-color" content="#08080c" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AmirHossein — Full-Stack Developer</title>
+<meta name="description" content="Portfolio and resume of AmirHossein — full-stack developer building fast, modern web products." />
+<meta name="theme-color" content="#07080a" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="AmirHossein — Full-Stack Developer" />
+<meta property="og:description" content="Portfolio and resume of AmirHossein — full-stack developer building fast, modern web products." />
+<meta property="og:url" content="https://localvps.github.io/" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080a'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23ff5a3c'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://unpkg.com" crossorigin />
+<link rel="modulepreload" href="https://unpkg.com/three@0.169.0/build/three.module.js" />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
-  <script>document.documentElement.classList.add('js');</script>
+<script>document.documentElement.classList.add('js');</script>
 
-  <div class="cursor-dot" aria-hidden="true"></div>
-  <div class="cursor-ring" aria-hidden="true"></div>
-  <div class="progress" aria-hidden="true"><span></span></div>
+<canvas id="webgl" aria-hidden="true"></canvas>
+<div class="veil" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" aria-hidden="true"></div>
 
-  <canvas id="stardust" aria-hidden="true"></canvas>
+<header class="nav">
+  <a class="brand" href="#top">
+    <span class="brand-dot"></span>
+    <span class="brand-name">AmirHossein</span>
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#about"><i>01</i>About</a>
+    <a href="#skills"><i>02</i>Skills</a>
+    <a href="#work"><i>03</i>Work</a>
+    <a href="#contact"><i>04</i>Contact</a>
+  </nav>
+  <a class="pill" href="mailto:amirhosseingivi85@gmail.com">Available for work</a>
+</header>
 
-  <div class="bg-scene" aria-hidden="true">
-    <div class="bg-aurora b1"></div>
-    <div class="bg-aurora b2"></div>
-    <div class="bg-aurora b3"></div>
-    <div class="bg-grid"></div>
-    <div class="bg-noise"></div>
-    <div class="bg-vignette"></div>
-  </div>
+<div class="progress" aria-hidden="true"><span></span></div>
 
-  <div class="site">
-    <header class="nav" id="nav">
-      <a class="nav-logo magnetic" href="#top" aria-label="Home">AM<span>·</span>H</a>
-      <nav class="nav-links">
-        <a href="#about">About</a>
-        <a href="#skills">Skills</a>
-        <a href="#work">Work</a>
-      </nav>
-      <a class="btn btn-ghost btn-sm nav-cta magnetic" href="#contact">Hire me</a>
-    </header>
+<main id="top">
 
-    <section class="hero" id="top">
-      <div class="hero-inner">
-        <div class="hero-copy">
-          <p class="hero-badge anim-up" style="animation-delay:.1s">
-            <span class="pulse"></span> Available for new projects
-          </p>
-          <h1 class="hero-title">
-            <span class="line"><span class="glitch anim-up" data-text="Amir" style="animation-delay:.2s">Amir</span></span>
-            <span class="line"><span class="glitch grad-text anim-up" data-text="Hossein" style="animation-delay:.3s">Hossein</span></span>
-          </h1>
-          <p class="hero-role anim-up" style="animation-delay:.45s"><span class="role-line"></span>Full-Stack Developer<span class="role-line"></span></p>
-          <p class="hero-tag anim-up" style="animation-delay:.55s">
-            I design and build fast, modern web products — from pixel-perfect UI to
-            solid back-ends and everything in between.
-          </p>
-          <div class="hero-actions anim-up" style="animation-delay:.7s">
-            <a href="#contact" class="btn btn-3d magnetic">Let's talk</a>
-            <a href="#work" class="btn btn-ghost magnetic">See my work</a>
-          </div>
-        </div>
-
-        <div class="hero-stage" id="hero-stage">
-          <div class="term-wrap">
-            <div class="term-halo" aria-hidden="true"></div>
-            <div class="term-card">
-              <div class="term-bar">
-                <span class="term-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-                <span class="term-title">localvps@dev — zsh</span>
-              </div>
-              <div class="term-body" id="term-body" role="log" aria-live="off"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <a class="scroll-hint" href="#about" aria-label="Scroll down">
-        <span class="scroll-hint-line"></span>
-        <span class="scroll-hint-text">scroll</span>
-      </a>
-    </section>
-
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
-        <span>TypeScript</span><i>◆</i>
-        <span>Node.js</span><i>◆</i>
-        <span>React</span><i>◆</i>
-        <span>PHP</span><i>◆</i>
-        <span>Java</span><i>◆</i>
-        <span>C#</span><i>◆</i>
-        <span>CSS / HTML</span><i>◆</i>
-        <span>Git &amp; GitHub</span><i>◆</i>
-        <span>Linux / Bash</span><i>◆</i>
-        <span>TypeScript</span><i>◆</i>
-        <span>Node.js</span><i>◆</i>
-        <span>React</span><i>◆</i>
-        <span>PHP</span><i>◆</i>
-        <span>Java</span><i>◆</i>
-        <span>C#</span><i>◆</i>
-        <span>CSS / HTML</span><i>◆</i>
-        <span>Git &amp; GitHub</span><i>◆</i>
-        <span>Linux / Bash</span><i>◆</i>
-      </div>
+  <!-- ───────────────────────── hero ───────────────────────── -->
+  <section class="hero">
+    <div class="hero-meta">
+      <span>Full-Stack Developer</span>
+      <span>Tehran, Iran</span>
+      <span>UTC+3:30</span>
     </div>
 
-    <main>
-      <section class="section" id="about">
-        <div class="container">
-          <p class="sec-index d3" data-reveal><span>01</span> — About</p>
-          <div class="about-grid">
-            <h2 class="about-heading d3" data-reveal>
-              Turning ideas into<br />products that <em class="grad-text">ship</em>.
-            </h2>
-            <div class="about-body d3" data-reveal>
-              <p>
-                I'm a developer who cares about the details. I've spent years
-                building web applications across the full stack — clean
-                TypeScript on the front, solid Node.js services behind it, and
-                pragmatic PHP when the job calls for it.
-              </p>
-              <p>
-                I like to keep things simple: fewer moving parts, readable code,
-                and interfaces that feel natural to use.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+    <h1 class="hero-title">
+      <span class="word" style="--d:0">
+        <span class="ch">A</span><span class="ch">m</span><span class="ch">i</span><span class="ch">r</span>
+      </span>
+      <span class="word serif" style="--d:1">
+        <span class="ch">H</span><span class="ch">o</span><span class="ch">s</span><span class="ch">s</span><span class="ch">e</span><span class="ch">i</span><span class="ch">n</span>
+      </span>
+    </h1>
 
-      <section class="section" id="skills">
-        <div class="container">
-          <p class="sec-index d3" data-reveal><span>02</span> — Skills</p>
-          <h2 class="section-title d3" data-reveal>My <em class="grad-text">toolbox.</em></h2>
-          <div class="skills-grid" id="skills-grid"></div>
-        </div>
-      </section>
+    <p class="hero-lede">
+      I design and build fast, modern web products — from pixel-perfect interfaces
+      to solid back-ends, and everything in between.
+    </p>
 
-      <section class="section" id="work">
-        <div class="container">
-          <p class="sec-index d3" data-reveal><span>03</span> — Work</p>
-          <h2 class="section-title d3" data-reveal>What I'm <em class="grad-text">up to.</em></h2>
-          <div class="projects-grid">
-            <a class="project-card tilt" href="https://github.com/localvps/whispering-dungeon" target="_blank" rel="noopener" data-reveal>
-              <span class="project-top">
-                <span class="project-arrow" aria-hidden="true">↗</span>
-                <span class="project-tag">HTML · JS</span>
-              </span>
-              <span class="project-info">
-                <span class="project-title">The Whispering Dungeon</span>
-                <span class="project-desc">A free browser dungeon-crawl adventure — explorable, playable, no install.</span>
-              </span>
-              <span class="project-glow" aria-hidden="true"></span>
-              <span class="project-shine" aria-hidden="true"></span>
-            </a>
-            <a class="project-card tilt" href="https://github.com/localvps/guardvpn" target="_blank" rel="noopener" data-reveal>
-              <span class="project-top">
-                <span class="project-arrow" aria-hidden="true">↗</span>
-                <span class="project-tag">Shell · Bash</span>
-              </span>
-              <span class="project-info">
-                <span class="project-title">GuardVPN</span>
-                <span class="project-desc">A streamlined SSH tunnel manager for fast, reliable VPN connections.</span>
-              </span>
-              <span class="project-glow" aria-hidden="true"></span>
-              <span class="project-shine" aria-hidden="true"></span>
-            </a>
-            <a class="project-card tilt" href="https://github.com/localvps/smsbomber" target="_blank" rel="noopener" data-reveal>
-              <span class="project-top">
-                <span class="project-arrow" aria-hidden="true">↗</span>
-                <span class="project-tag">PHP</span>
-              </span>
-              <span class="project-info">
-                <span class="project-title">SMS Bomber</span>
-                <span class="project-desc">A PHP-based messaging tool with a terminal-friendly CLI workflow.</span>
-              </span>
-              <span class="project-glow" aria-hidden="true"></span>
-              <span class="project-shine" aria-hidden="true"></span>
-            </a>
-          </div>
-          <a class="work-card tilt" href="https://github.com/localvps" target="_blank" rel="noopener" data-reveal>
-            <span class="work-card-arrow" aria-hidden="true">↗</span>
-            <span class="work-card-info">
-              <span class="work-card-title">All my projects &amp; open source</span>
-              <span class="work-card-desc">Browse the code I write and ship on GitHub.</span>
-            </span>
-            <span class="work-card-url">github.com/localvps</span>
-            <span class="work-card-glow" aria-hidden="true"></span>
-            <span class="work-card-shine" aria-hidden="true"></span>
-          </a>
-        </div>
-      </section>
+    <div class="hero-actions">
+      <a class="btn btn-solid" href="#work"><span>See the work</span></a>
+      <a class="btn btn-line" href="#contact"><span>Get in touch</span></a>
+    </div>
 
-      <section class="section contact" id="contact">
-        <div class="container">
-          <p class="sec-index d3" data-reveal><span>04</span> — Contact</p>
-          <h2 class="contact-title d3" data-reveal>
-            Have an idea?<br /><em class="grad-text">Let's build it.</em>
-          </h2>
-          <a class="btn btn-neon magnetic" data-reveal href="mailto:amirhosseingivi85@gmail.com">
-            amirhosseingivi85@gmail.com
-          </a>
-          <div class="contact-links" data-reveal>
-            <a class="contact-link magnetic" href="https://t.me/localvps" target="_blank" rel="noopener">Telegram — @localvps</a>
-            <a class="contact-link magnetic" href="https://instagram.com/vps.local" target="_blank" rel="noopener">Instagram — @vps.local</a>
-            <a class="contact-link magnetic" href="https://github.com/localvps" target="_blank" rel="noopener">GitHub — @localvps</a>
-          </div>
-        </div>
-      </section>
-    </main>
+    <div class="hero-foot">
+      <span class="hero-hint"><i></i>scroll to explore</span>
+      <span class="hero-count"><b id="scene-name">sphere</b> / 04</span>
+    </div>
+  </section>
 
-    <footer class="footer">
-      <span>© 2026 AmirHossein</span>
-      <span class="footer-loc">Tehran, Iran — UTC+3:30</span>
-      <a href="#top" class="footer-top">Back to top ↑</a>
-    </footer>
+  <!-- ───────────────────────── marquee ───────────────────────── -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>TypeScript</span><em>·</em><span>Node.js</span><em>·</em><span>React</span><em>·</em><span>PHP</span><em>·</em><span>Java</span><em>·</em><span>C#</span><em>·</em><span>CSS</span><em>·</em><span>HTML</span><em>·</em><span>Git</span><em>·</em><span>Linux</span><em>·</em>
+      <span>TypeScript</span><em>·</em><span>Node.js</span><em>·</em><span>React</span><em>·</em><span>PHP</span><em>·</em><span>Java</span><em>·</em><span>C#</span><em>·</em><span>CSS</span><em>·</em><span>HTML</span><em>·</em><span>Git</span><em>·</em><span>Linux</span><em>·</em>
+    </div>
   </div>
 
-  <script src="script.js?v=8"></script>
+  <!-- ───────────────────────── about ───────────────────────── -->
+  <section class="sec" id="about">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <span class="sec-label">About</span>
+    </div>
+    <div class="about">
+      <h2 class="display rv">
+        Turning ideas into<br />
+        products that <em>ship</em>.
+      </h2>
+      <div class="about-copy rv">
+        <p>
+          I'm a developer who cares about the details. I've spent years building
+          web applications across the full stack — clean TypeScript on the front,
+          solid Node.js services behind it, and pragmatic PHP when the job calls
+          for it.
+        </p>
+        <p>
+          I like to keep things simple: fewer moving parts, readable code, and
+          interfaces that feel natural to use.
+        </p>
+        <dl class="facts">
+          <div><dt>Focus</dt><dd>Full-stack web</dd></div>
+          <div><dt>Stack</dt><dd>TS · Node · PHP</dd></div>
+          <div><dt>Since</dt><dd>2019</dd></div>
+          <div><dt>Based in</dt><dd>Tehran, IR</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── skills ───────────────────────── -->
+  <section class="sec" id="skills">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <span class="sec-label">Skills</span>
+    </div>
+    <h2 class="display rv">The <em>toolbox</em>.</h2>
+    <ul class="skills" id="skills-list"></ul>
+  </section>
+
+  <!-- ───────────────────────── work ───────────────────────── -->
+  <section class="sec" id="work">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <span class="sec-label">Work</span>
+    </div>
+    <h2 class="display rv">Selected <em>work</em>.</h2>
+
+    <div class="work-list" id="work-list"></div>
+
+    <a class="all-repos" href="https://github.com/localvps" target="_blank" rel="noopener">
+      <span>Everything else on GitHub</span>
+      <span class="all-repos-url">github.com/localvps</span>
+      <span class="all-repos-arrow">↗</span>
+    </a>
+  </section>
+
+  <!-- ───────────────────────── contact ───────────────────────── -->
+  <section class="sec contact" id="contact">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <span class="sec-label">Contact</span>
+    </div>
+    <h2 class="display big rv">Have an idea?<br /><em>Let's build it.</em></h2>
+    <a class="mail" href="mailto:amirhosseingivi85@gmail.com">amirhosseingivi85@gmail.com</a>
+    <ul class="socials">
+      <li><a href="https://github.com/localvps" target="_blank" rel="noopener"><span>GitHub</span><em>@localvps</em></a></li>
+      <li><a href="https://t.me/localvps" target="_blank" rel="noopener"><span>Telegram</span><em>@localvps</em></a></li>
+      <li><a href="https://instagram.com/vps.local" target="_blank" rel="noopener"><span>Instagram</span><em>@vps.local</em></a></li>
+    </ul>
+  </section>
+
+  <footer class="footer">
+    <span>© 2026 AmirHossein</span>
+    <span class="footer-mid">Built from scratch — no templates.</span>
+    <a href="#top">Back to top ↑</a>
+  </footer>
+</main>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.169.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module" src="script.js?v=3"></script>
 </body>
 </html>
